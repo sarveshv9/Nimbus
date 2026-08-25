@@ -1,0 +1,219 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map, catchError, throwError, forkJoin } from 'rxjs';
+import {
+  CurrentWeather,
+  HourlyForecast,
+  DailyForecast,
+  AirQuality,
+  WeatherData,
+  WeatherError,
+} from '../models/weather.model';
+
+const FORECAST_API = 'https://api.open-meteo.com/v1/forecast';
+const AIR_QUALITY_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+
+// Current weather variables
+const CURRENT_PARAMS = [
+  'temperature_2m',
+  'relative_humidity_2m',
+  'apparent_temperature',
+  'is_day',
+  'precipitation',
+  'weather_code',
+  'cloud_cover',
+  'pressure_msl',
+  'wind_speed_10m',
+  'wind_direction_10m',
+  'wind_gusts_10m',
+  'uv_index',
+  'visibility',
+].join(',');
+
+// Hourly variables
+const HOURLY_PARAMS = [
+  'temperature_2m',
+  'relative_humidity_2m',
+  'apparent_temperature',
+  'precipitation_probability',
+  'precipitation',
+  'weather_code',
+  'cloud_cover',
+  'visibility',
+  'wind_speed_10m',
+  'wind_direction_10m',
+  'uv_index',
+  'is_day',
+].join(',');
+
+// Daily variables
+const DAILY_PARAMS = [
+  'weather_code',
+  'temperature_2m_max',
+  'temperature_2m_min',
+  'apparent_temperature_max',
+  'apparent_temperature_min',
+  'sunrise',
+  'sunset',
+  'uv_index_max',
+  'precipitation_sum',
+  'precipitation_probability_max',
+  'wind_speed_10m_max',
+  'wind_direction_10m_dominant',
+].join(',');
+
+// Air quality variables
+const AQ_PARAMS = ['us_aqi', 'european_aqi', 'pm2_5', 'pm10'].join(',');
+
+interface OpenMeteoForecastResponse {
+  current: Record<string, number | string>;
+  hourly: Record<string, (number | string | null)[]>;
+  daily: Record<string, (number | string | null)[]>;
+}
+
+interface OpenMeteoAirQualityResponse {
+  current: Record<string, number | null>;
+}
+
+@Injectable({ providedIn: 'root' })
+export class WeatherService {
+  constructor(private readonly http: HttpClient) {}
+
+  /**
+   * Fetches complete weather data (forecast + air quality) for a location.
+   * Uses forkJoin to parallel-fetch both endpoints.
+   */
+  fetchWeatherData(lat: number, lon: number): Observable<WeatherData> {
+    return forkJoin({
+      forecast: this.fetchForecast(lat, lon),
+      airQuality: this.fetchAirQuality(lat, lon).pipe(
+        catchError(() => [null as AirQuality | null])
+      ),
+    }).pipe(
+      map(({ forecast, airQuality }) => ({
+        current: forecast.current,
+        hourly: forecast.hourly,
+        daily: forecast.daily,
+        airQuality,
+      })),
+      catchError(err => throwError(() => this.mapError(err)))
+    );
+  }
+
+  private fetchForecast(lat: number, lon: number): Observable<{
+    current: CurrentWeather;
+    hourly: HourlyForecast[];
+    daily: DailyForecast[];
+  }> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lon.toString())
+      .set('current', CURRENT_PARAMS)
+      .set('hourly', HOURLY_PARAMS)
+      .set('daily', DAILY_PARAMS)
+      .set('timezone', 'auto')
+      .set('forecast_days', '7');
+
+    return this.http.get<OpenMeteoForecastResponse>(FORECAST_API, { params }).pipe(
+      map(response => ({
+        current: this.mapCurrentWeather(response.current),
+        hourly: this.mapHourlyForecast(response.hourly),
+        daily: this.mapDailyForecast(response.daily),
+      }))
+    );
+  }
+
+  private fetchAirQuality(lat: number, lon: number): Observable<AirQuality | null> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lon.toString())
+      .set('current', AQ_PARAMS);
+
+    return this.http.get<OpenMeteoAirQualityResponse>(AIR_QUALITY_API, { params }).pipe(
+      map(response => this.mapAirQuality(response.current)),
+      catchError(() => [null])
+    );
+  }
+
+  // === RESPONSE MAPPING ===
+
+  private mapCurrentWeather(data: Record<string, number | string>): CurrentWeather {
+    return {
+      temperature: data['temperature_2m'] as number,
+      feelsLike: data['apparent_temperature'] as number,
+      humidity: data['relative_humidity_2m'] as number,
+      precipitation: data['precipitation'] as number,
+      weatherCode: data['weather_code'] as number,
+      cloudCover: data['cloud_cover'] as number,
+      pressure: data['pressure_msl'] as number,
+      windSpeed: data['wind_speed_10m'] as number,
+      windDirection: data['wind_direction_10m'] as number,
+      windGusts: data['wind_gusts_10m'] as number,
+      uvIndex: data['uv_index'] as number,
+      visibility: data['visibility'] as number,
+      isDay: data['is_day'] === 1,
+      time: data['time'] as string,
+    };
+  }
+
+  private mapHourlyForecast(data: Record<string, (number | string | null)[]>): HourlyForecast[] {
+    const times = data['time'] as string[];
+    return times.map((time, i) => ({
+      time,
+      temperature: (data['temperature_2m']?.[i] ?? 0) as number,
+      feelsLike: (data['apparent_temperature']?.[i] ?? 0) as number,
+      humidity: (data['relative_humidity_2m']?.[i] ?? 0) as number,
+      precipitationProbability: (data['precipitation_probability']?.[i] ?? 0) as number,
+      precipitation: (data['precipitation']?.[i] ?? 0) as number,
+      weatherCode: (data['weather_code']?.[i] ?? 0) as number,
+      cloudCover: (data['cloud_cover']?.[i] ?? 0) as number,
+      visibility: (data['visibility']?.[i] ?? 0) as number,
+      windSpeed: (data['wind_speed_10m']?.[i] ?? 0) as number,
+      windDirection: (data['wind_direction_10m']?.[i] ?? 0) as number,
+      uvIndex: (data['uv_index']?.[i] ?? 0) as number,
+      isDay: data['is_day']?.[i] === 1,
+    }));
+  }
+
+  private mapDailyForecast(data: Record<string, (number | string | null)[]>): DailyForecast[] {
+    const dates = data['time'] as string[];
+    return dates.map((date, i) => ({
+      date,
+      weatherCode: (data['weather_code']?.[i] ?? 0) as number,
+      tempMax: (data['temperature_2m_max']?.[i] ?? 0) as number,
+      tempMin: (data['temperature_2m_min']?.[i] ?? 0) as number,
+      feelsLikeMax: (data['apparent_temperature_max']?.[i] ?? 0) as number,
+      feelsLikeMin: (data['apparent_temperature_min']?.[i] ?? 0) as number,
+      sunrise: (data['sunrise']?.[i] ?? '') as string,
+      sunset: (data['sunset']?.[i] ?? '') as string,
+      uvIndexMax: (data['uv_index_max']?.[i] ?? 0) as number,
+      precipitationSum: (data['precipitation_sum']?.[i] ?? 0) as number,
+      precipitationProbabilityMax: (data['precipitation_probability_max']?.[i] ?? 0) as number,
+      windSpeedMax: (data['wind_speed_10m_max']?.[i] ?? 0) as number,
+      windDirectionDominant: (data['wind_direction_10m_dominant']?.[i] ?? 0) as number,
+    }));
+  }
+
+  private mapAirQuality(data: Record<string, number | null>): AirQuality {
+    return {
+      usAqi: data['us_aqi'] ?? null,
+      europeanAqi: data['european_aqi'] ?? null,
+      pm25: data['pm2_5'] ?? null,
+      pm10: data['pm10'] ?? null,
+    };
+  }
+
+  private mapError(err: unknown): WeatherError {
+    if (err instanceof Error && err.message.includes('Http failure response')) {
+      return { type: 'network', message: 'Unable to connect to weather service. Check your internet connection.' };
+    }
+    const httpErr = err as { status?: number };
+    if (httpErr.status === 429) {
+      return { type: 'rate-limit', message: 'Too many requests. Please try again in a moment.' };
+    }
+    if (httpErr.status === 400) {
+      return { type: 'location-invalid', message: 'Invalid location coordinates.' };
+    }
+    return { type: 'unknown', message: 'Something went wrong. Please try again.' };
+  }
+}
