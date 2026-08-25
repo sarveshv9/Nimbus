@@ -2,10 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Nimbus</title>
+  <title>Nimbus — Premium Weather Experience</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A production-quality weather visualization platform built with modern Angular architecture, featuring immersive weather-driven theming, custom data visualizations, and responsive glassmorphic design.">
+  <meta name="theme-color" content="#0a0e1a">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Google Fonts: Outfit (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Prevent FOUC: apply saved theme before Angular bootstraps -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('nimbus-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
   <nimbus-root></nimbus-root>
