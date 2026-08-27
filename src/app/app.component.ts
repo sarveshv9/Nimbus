@@ -27,58 +27,27 @@ import { SearchOverlayComponent } from './features/explore/components/search-ove
 
       <!-- Main content -->
       <div class="app-content">
-        <!-- Top bar -->
-        <header class="app-header">
-          <div class="header-inner">
-            <a routerLink="/" class="logo" aria-label="Nimbus home">
-              <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="32" r="28" fill="var(--accent)" opacity="0.15"/>
-                <path d="M18 38 C18 38 16 28 26 26 C30 20 42 20 44 26 C50 26 52 32 50 36 C52 38 50 42 46 42 L20 42 C16 42 14 40 18 38 Z"
-                      fill="var(--accent)" opacity="0.9"/>
-              </svg>
-              <span class="logo-text">Nimbus</span>
-            </a>
-            <div class="header-actions">
-              <button
-                class="icon-btn"
-                (click)="toggleSearch()"
-                aria-label="Search locations"
-                title="Search (⌘K)"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.3-4.3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </header>
-
         <!-- Router outlet -->
         <main class="app-main">
           <router-outlet />
         </main>
 
-        <!-- Bottom navigation (mobile) -->
+        <!-- Bottom navigation (mobile) — floating pill -->
         <nav class="bottom-nav" aria-label="Main navigation">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" aria-label="Home">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span>Home</span>
           </a>
-          <a routerLink="/explore" routerLinkActive="active" aria-label="Explore">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <span>Explore</span>
-          </a>
           <a routerLink="/forecast" routerLinkActive="active" aria-label="Forecast">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
             <span>Forecast</span>
           </a>
-          <a routerLink="/details" routerLinkActive="active" aria-label="Details">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            <span>Details</span>
-          </a>
+          <button class="nav-search-btn" (click)="toggleSearch()" aria-label="Search locations" title="Search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Search</span>
+          </button>
           <a routerLink="/locations" routerLinkActive="active" aria-label="Saved locations">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Saved</span>
           </a>
         </nav>

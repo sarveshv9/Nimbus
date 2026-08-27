@@ -30,7 +30,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item bento-wide">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">🌡️</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></span>
                 <span class="metric-name">Temperature</span>
               </div>
               <div class="metric-big-value font-display">{{ current.temperature | temperature }}</div>
@@ -45,7 +45,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">💨</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg></span>
                 <span class="metric-name">Wind</span>
               </div>
               <div class="compass" aria-label="Wind direction compass">
@@ -77,7 +77,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">💧</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></span>
                 <span class="metric-name">Humidity</span>
               </div>
               <div class="ring-container" aria-label="Humidity at {{ current.humidity }} percent">
@@ -101,7 +101,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">📊</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/></svg></span>
                 <span class="metric-name">Pressure</span>
               </div>
               <div class="metric-big-value font-display">{{ current.pressure }}</div>
@@ -114,7 +114,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">☀️</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
                 <span class="metric-name">UV Index</span>
               </div>
               <div class="metric-big-value font-display" [style.color]="uvIndexColor(current.uvIndex)">
@@ -133,7 +133,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">👁️</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></span>
                 <span class="metric-name">Visibility</span>
               </div>
               <div class="metric-big-value font-display">{{ (current.visibility / 1000).toFixed(0) }}</div>
@@ -146,7 +146,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
           <nimbus-glass-card class="bento-item">
             <div class="metric-visual">
               <div class="metric-label-row">
-                <span class="metric-icon">☁️</span>
+                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span>
                 <span class="metric-name">Cloud Cover</span>
               </div>
               <div class="metric-big-value font-display">{{ current.cloudCover }}%</div>
@@ -162,7 +162,7 @@ import { getAqiCategory } from '../../core/models/weather.model';
               <nimbus-glass-card class="bento-item">
                 <div class="metric-visual">
                   <div class="metric-label-row">
-                    <span class="metric-icon">🌿</span>
+                    <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></span>
                     <span class="metric-name">Air Quality</span>
                   </div>
                   <div class="metric-big-value font-display" [style.color]="getAqiCategory(aq.usAqi!).color">
@@ -231,7 +231,12 @@ import { getAqiCategory } from '../../core/models/weather.model';
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .metric-icon { font-size: var(--text-base); }
+    .metric-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
     .metric-big-value {
       font-size: var(--text-3xl);
       font-weight: var(--weight-bold);
