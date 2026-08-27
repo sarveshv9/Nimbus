@@ -61,6 +61,7 @@
   color: var(--text-primary);
   line-height: 1;
   letter-spacing: -0.04em;
+  text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.2);
 }
 
 .hero-condition {
@@ -234,9 +235,10 @@
 
 .stat-bar-fill {
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
   border-radius: var(--radius-full);
   transition: width var(--duration-slow) var(--ease-default);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
 }
 
 .uv-scale {
@@ -313,7 +315,7 @@
 
 .daily-precip {
   font-size: var(--text-xs);
-  color: hsl(200, 70%, 50%);
+  color: hsl(200, 85%, 62%);
   font-weight: var(--weight-medium);
   width: 32px;
   text-align: right;
@@ -356,8 +358,9 @@
   top: 0;
   height: 100%;
   border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--accent), hsl(38, 92%, 55%));
+  background: linear-gradient(90deg, var(--accent), var(--warning));
   transition: all var(--duration-slow) var(--ease-default);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3);
 }
 
 /* === AIR QUALITY === */

@@ -39,7 +39,7 @@ body {
               color var(--duration-slow) var(--ease-default);
 }
 
-/* Allow text selection in specific areas if needed */
+/* Allow text selection in specific areas */
 input, textarea {
   user-select: auto;
 }
@@ -119,12 +119,12 @@ ul, ol {
   --radius-2xl: 2rem;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 40px rgba(var(--accent-rgb), 0.15);
+  /* Shadows — deep and colorful */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 50px rgba(var(--accent-rgb), 0.25);
 
   /* Motion */
   --duration-instant: 100ms;
@@ -146,133 +146,138 @@ ul, ol {
   --z-toast: 500;
   --z-effects: -1;
 
-  /* Glass */
-  --glass-blur: 20px;
-  --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+  /* Glass — premium frosted glass */
+  --glass-blur: 28px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
 
   /* Layout */
   --container-max: 1200px;
   --nav-height: 64px;
   --bottom-nav-height: 72px;
+
+  /* === VIBRANT DARK PALETTE === */
+  --bg-primary: hsl(230, 35%, 7%);
+  --bg-secondary: hsl(230, 30%, 11%);
+  --bg-surface: rgba(255, 255, 255, 0.07);
+  --bg-surface-hover: rgba(255, 255, 255, 0.12);
+  --bg-surface-solid: hsl(230, 25%, 14%);
+  --bg-overlay: rgba(0, 0, 0, 0.65);
+
+  --text-primary: hsl(0, 0%, 96%);
+  --text-secondary: hsl(215, 20%, 72%);
+  --text-muted: hsl(215, 12%, 50%);
+  --text-inverse: hsl(220, 25%, 12%);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --accent: hsl(215, 100%, 62%);
+  --accent-hover: hsl(215, 100%, 72%);
+  --accent-rgb: 66, 153, 255;
+
+  --success: hsl(155, 72%, 52%);
+  --warning: hsl(42, 100%, 60%);
+  --danger: hsl(0, 85%, 62%);
+
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border-color: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* === LIGHT THEME (Default) === */
-[data-theme="light"] {
-  --bg-primary: hsl(210, 40%, 97%);
-  --bg-secondary: hsl(210, 30%, 93%);
-  --bg-surface: rgba(255, 255, 255, 0.72);
-  --bg-surface-hover: rgba(255, 255, 255, 0.88);
-  --bg-surface-solid: hsl(0, 0%, 100%);
-  --bg-overlay: rgba(0, 0, 0, 0.4);
-
-  --text-primary: hsl(220, 25%, 12%);
-  --text-secondary: hsl(220, 15%, 40%);
-  --text-muted: hsl(220, 10%, 55%);
-  --text-inverse: hsl(0, 0%, 100%);
-
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-default: rgba(0, 0, 0, 0.1);
-  --border-strong: rgba(0, 0, 0, 0.18);
-
-  --accent: hsl(215, 80%, 55%);
-  --accent-hover: hsl(215, 80%, 48%);
-  --accent-rgb: 59, 130, 246;
-
-  --success: hsl(152, 60%, 42%);
-  --warning: hsl(38, 92%, 55%);
-  --danger: hsl(0, 72%, 55%);
-
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border-color: rgba(255, 255, 255, 0.25);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-}
-
-/* === DARK THEME === */
+/* Force vibrant dark on all theme attributes */
+[data-theme="light"],
 [data-theme="dark"] {
   --bg-primary: hsl(230, 35%, 7%);
   --bg-secondary: hsl(230, 30%, 11%);
-  --bg-surface: rgba(255, 255, 255, 0.06);
-  --bg-surface-hover: rgba(255, 255, 255, 0.1);
+  --bg-surface: rgba(255, 255, 255, 0.07);
+  --bg-surface-hover: rgba(255, 255, 255, 0.12);
   --bg-surface-solid: hsl(230, 25%, 14%);
-  --bg-overlay: rgba(0, 0, 0, 0.6);
-
-  --text-primary: hsl(210, 30%, 92%);
-  --text-secondary: hsl(215, 15%, 65%);
-  --text-muted: hsl(215, 10%, 48%);
+  --bg-overlay: rgba(0, 0, 0, 0.65);
+  --text-primary: hsl(0, 0%, 96%);
+  --text-secondary: hsl(215, 20%, 72%);
+  --text-muted: hsl(215, 12%, 50%);
   --text-inverse: hsl(220, 25%, 12%);
-
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
-
-  --accent: hsl(215, 80%, 60%);
-  --accent-hover: hsl(215, 80%, 68%);
-  --accent-rgb: 96, 165, 250;
-
-  --success: hsl(152, 60%, 52%);
-  --warning: hsl(38, 92%, 60%);
-  --danger: hsl(0, 72%, 60%);
-
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border-color: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --accent: hsl(215, 100%, 62%);
+  --accent-hover: hsl(215, 100%, 72%);
+  --accent-rgb: 66, 153, 255;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border-color: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* === WEATHER THEME OVERRIDES === */
+/* === VIBRANT WEATHER THEME OVERRIDES === */
 [data-weather="clear"] {
-  --weather-accent: hsl(38, 92%, 55%);
-  --weather-bg: linear-gradient(165deg, hsl(210, 60%, 85%), hsl(200, 55%, 72%), hsl(38, 65%, 80%));
-  --weather-surface: rgba(255, 255, 255, 0.55);
-}
-[data-theme="dark"][data-weather="clear"] {
-  --weather-bg: linear-gradient(165deg, hsl(230, 40%, 12%), hsl(220, 45%, 18%), hsl(230, 30%, 15%));
-  --weather-surface: rgba(255, 255, 255, 0.05);
+  --weather-accent: hsl(42, 100%, 62%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(225, 55%, 14%) 0%,
+    hsl(210, 65%, 22%) 35%,
+    hsl(190, 50%, 18%) 65%,
+    hsl(35, 45%, 18%) 100%);
+  --weather-surface: rgba(255, 200, 50, 0.06);
+  --accent: hsl(42, 100%, 62%);
+  --accent-rgb: 255, 191, 61;
 }
 
 [data-weather="cloudy"] {
-  --weather-accent: hsl(215, 40%, 55%);
-  --weather-bg: linear-gradient(165deg, hsl(215, 20%, 82%), hsl(215, 25%, 75%), hsl(215, 18%, 70%));
-  --weather-surface: rgba(200, 210, 225, 0.5);
-}
-[data-theme="dark"][data-weather="cloudy"] {
-  --weather-bg: linear-gradient(165deg, hsl(220, 25%, 14%), hsl(215, 28%, 18%), hsl(220, 20%, 16%));
-  --weather-surface: rgba(255, 255, 255, 0.04);
+  --weather-accent: hsl(220, 50%, 65%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(225, 35%, 12%) 0%,
+    hsl(218, 40%, 18%) 40%,
+    hsl(230, 30%, 22%) 100%);
+  --weather-surface: rgba(140, 170, 230, 0.06);
+  --accent: hsl(220, 70%, 65%);
+  --accent-rgb: 110, 155, 235;
 }
 
 [data-weather="rain"] {
-  --weather-accent: hsl(200, 70%, 50%);
-  --weather-bg: linear-gradient(165deg, hsl(220, 30%, 30%), hsl(215, 35%, 22%), hsl(225, 28%, 18%));
-  --weather-surface: rgba(30, 50, 80, 0.45);
-}
-[data-theme="dark"][data-weather="rain"] {
-  --weather-bg: linear-gradient(165deg, hsl(220, 35%, 10%), hsl(215, 40%, 8%), hsl(225, 30%, 6%));
-  --weather-surface: rgba(255, 255, 255, 0.03);
+  --weather-accent: hsl(200, 85%, 58%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(230, 40%, 8%) 0%,
+    hsl(215, 55%, 16%) 35%,
+    hsl(200, 45%, 14%) 65%,
+    hsl(220, 35%, 10%) 100%);
+  --weather-surface: rgba(60, 140, 220, 0.06);
+  --accent: hsl(200, 85%, 58%);
+  --accent-rgb: 56, 172, 240;
 }
 
 [data-weather="storm"] {
-  --weather-accent: hsl(280, 60%, 55%);
-  --weather-bg: linear-gradient(165deg, hsl(240, 25%, 15%), hsl(260, 30%, 12%), hsl(240, 20%, 10%));
-  --weather-surface: rgba(40, 30, 70, 0.5);
-}
-[data-theme="dark"][data-weather="storm"] {
-  --weather-bg: linear-gradient(165deg, hsl(240, 30%, 6%), hsl(260, 35%, 5%), hsl(240, 25%, 4%));
-  --weather-surface: rgba(255, 255, 255, 0.03);
+  --weather-accent: hsl(270, 75%, 65%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(260, 40%, 8%) 0%,
+    hsl(275, 45%, 14%) 35%,
+    hsl(240, 35%, 12%) 65%,
+    hsl(260, 30%, 7%) 100%);
+  --weather-surface: rgba(150, 80, 230, 0.06);
+  --accent: hsl(270, 75%, 65%);
+  --accent-rgb: 160, 100, 230;
 }
 
 [data-weather="snow"] {
-  --weather-accent: hsl(200, 60%, 60%);
-  --weather-bg: linear-gradient(165deg, hsl(210, 30%, 90%), hsl(210, 25%, 85%), hsl(215, 20%, 82%));
-  --weather-surface: rgba(240, 245, 255, 0.6);
-}
-[data-theme="dark"][data-weather="snow"] {
-  --weather-bg: linear-gradient(165deg, hsl(215, 25%, 14%), hsl(210, 30%, 12%), hsl(220, 20%, 10%));
-  --weather-surface: rgba(255, 255, 255, 0.05);
+  --weather-accent: hsl(195, 80%, 68%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(215, 30%, 12%) 0%,
+    hsl(210, 40%, 18%) 40%,
+    hsl(200, 30%, 22%) 100%);
+  --weather-surface: rgba(150, 210, 245, 0.06);
+  --accent: hsl(195, 80%, 68%);
+  --accent-rgb: 100, 200, 240;
 }
 
 [data-weather="night"] {
-  --weather-accent: hsl(230, 60%, 65%);
-  --weather-bg: linear-gradient(165deg, hsl(230, 40%, 8%), hsl(240, 35%, 6%), hsl(225, 30%, 5%));
-  --weather-surface: rgba(20, 25, 50, 0.6);
+  --weather-accent: hsl(245, 75%, 72%);
+  --weather-bg: linear-gradient(150deg,
+    hsl(240, 45%, 5%) 0%,
+    hsl(255, 40%, 10%) 35%,
+    hsl(230, 35%, 8%) 65%,
+    hsl(250, 30%, 5%) 100%);
+  --weather-surface: rgba(120, 100, 220, 0.06);
+  --accent: hsl(245, 75%, 72%);
+  --accent-rgb: 140, 115, 230;
 }
 
 /* === UTILITY CLASSES === */

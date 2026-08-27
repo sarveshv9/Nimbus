@@ -20,7 +20,8 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
       padding: var(--space-6);
       transition: background var(--duration-normal) var(--ease-default),
                   border-color var(--duration-normal) var(--ease-default),
-                  box-shadow var(--duration-normal) var(--ease-default);
+                  box-shadow var(--duration-normal) var(--ease-default),
+                  transform var(--duration-normal) var(--ease-default);
     }
 
     :host(.compact) {
@@ -34,12 +35,14 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
     :host(.interactive:hover) {
       background: var(--bg-surface-hover);
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-1px);
+      border-color: rgba(var(--accent-rgb), 0.2);
+      box-shadow: var(--shadow-lg), 0 0 24px rgba(var(--accent-rgb), 0.08);
+      transform: translateY(-2px);
     }
 
     :host(.interactive:active) {
       transform: translateY(0);
+      transition-duration: var(--duration-instant);
     }
 
     :host(.no-padding) {

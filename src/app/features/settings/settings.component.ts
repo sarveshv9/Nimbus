@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SettingsStore } from '../../core/state/settings.store';
 import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
-import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/settings.model';
+import { WindSpeedUnit } from '../../core/models/settings.model';
 
 @Component({
   selector: 'nimbus-settings',
@@ -65,31 +65,11 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
         </nimbus-glass-card>
       </section>
 
-      <!-- Appearance -->
+      <!-- Accessibility -->
       <section>
-        <h2 class="section-label">Appearance</h2>
+        <h2 class="section-label">Accessibility</h2>
         <nimbus-glass-card>
           <div class="setting-group">
-            <!-- Theme -->
-            <div class="setting-row">
-              <div class="setting-info">
-                <span class="setting-name">Theme</span>
-                <span class="setting-desc">Choose light, dark, or match your system</span>
-              </div>
-              <div class="toggle-group" role="radiogroup" aria-label="Theme mode">
-                @for (mode of themeModes; track mode.value) {
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.themeMode() === mode.value"
-                    (click)="settings.setThemeMode(mode.value)"
-                    role="radio"
-                    [attr.aria-checked]="settings.themeMode() === mode.value"
-                  >{{ mode.label }}</button>
-                }
-              </div>
-            </div>
-
-            <!-- Reduced Motion -->
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-name">Reduced Motion</span>
@@ -115,9 +95,27 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
         <h2 class="section-label">About</h2>
         <nimbus-glass-card>
           <div class="about-section">
-            <h3 class="about-title font-display">Nimbus</h3>
+            <div class="about-header">
+              <div class="about-logo">
+                <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
+                  <defs>
+                    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="hsl(215, 100%, 62%)" />
+                      <stop offset="100%" stop-color="hsl(245, 75%, 72%)" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="32" cy="32" r="28" fill="url(#logo-grad)" opacity="0.15"/>
+                  <path d="M18 38 C18 38 16 28 26 26 C30 20 42 20 44 26 C50 26 52 32 50 36 C52 38 50 42 46 42 L20 42 C16 42 14 40 18 38 Z"
+                        fill="url(#logo-grad)" opacity="0.9"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="about-title font-display">Nimbus</h3>
+                <p class="about-version">v1.0.0 · Angular Frontend Showcase</p>
+              </div>
+            </div>
             <p class="about-desc">
-              A production-quality weather visualization platform built as an Angular frontend engineering showcase.
+              A production-quality weather visualization platform demonstrating modern Angular architecture, signal-based state management, and premium UI engineering.
             </p>
 
             <div class="tech-grid">
@@ -143,15 +141,15 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
               </div>
               <div class="tech-item">
                 <span class="tech-label">Testing</span>
-                <span class="tech-value">Vitest + Playwright</span>
+                <span class="tech-value">Vitest</span>
               </div>
               <div class="tech-item">
                 <span class="tech-label">Accessibility</span>
                 <span class="tech-value">WCAG 2.2 AA</span>
               </div>
               <div class="tech-item">
-                <span class="tech-label">Deployment</span>
-                <span class="tech-value">GitHub Pages</span>
+                <span class="tech-label">PWA</span>
+                <span class="tech-value">Service Worker</span>
               </div>
             </div>
 
@@ -167,9 +165,9 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
                 <li>Deferred views (&#64;defer on viewport)</li>
                 <li>Modern control flow (&#64;if, &#64;for, &#64;switch)</li>
                 <li>Zoneless change detection</li>
-                <li>Functional HTTP interceptors</li>
                 <li>CSS custom properties theming</li>
                 <li>Accessible combobox (WAI-ARIA)</li>
+                <li>Progressive Web App (PWA)</li>
               </ul>
             </div>
           </div>
@@ -276,23 +274,46 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
     .about-section {
       display: flex;
       flex-direction: column;
+      gap: var(--space-5);
+    }
+    .about-header {
+      display: flex;
+      align-items: center;
       gap: var(--space-4);
+    }
+    .about-logo {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
     }
     .about-title {
       font-size: var(--text-2xl);
       font-weight: var(--weight-bold);
       color: var(--text-primary);
     }
+    .about-version {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
     .about-desc {
       font-size: var(--text-sm);
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.7;
     }
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: var(--space-3);
-      padding: var(--space-4) 0;
+      padding: var(--space-4);
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
     }
     .tech-item {
       display: flex;
@@ -332,10 +353,11 @@ import { TemperatureUnit, WindSpeedUnit, ThemeMode } from '../../core/models/set
       position: relative;
     }
     .architecture-list li::before {
-      content: '•';
+      content: '▸';
       position: absolute;
       left: 0;
       color: var(--accent);
+      font-size: var(--text-xs);
     }
   `],
 })
@@ -347,11 +369,5 @@ export class SettingsComponent {
     { value: 'mph', label: 'mph' },
     { value: 'ms', label: 'm/s' },
     { value: 'knots', label: 'kn' },
-  ];
-
-  readonly themeModes: { value: ThemeMode; label: string }[] = [
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-    { value: 'system', label: 'System' },
   ];
 }
