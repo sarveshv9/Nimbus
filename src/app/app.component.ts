@@ -1,11 +1,10 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { WeatherStore } from './core/state/weather.store';
 import { SettingsStore } from './core/state/settings.store';
 import { LocationStore } from './core/state/location.store';
 import { LocationService } from './core/services/location.service';
 import { WeatherEffectsComponent } from './layout/weather-effects/weather-effects.component';
-import { SearchOverlayComponent } from './features/explore/components/search-overlay/search-overlay.component';
 
 @Component({
   selector: 'nimbus-root',
@@ -15,7 +14,6 @@ import { SearchOverlayComponent } from './features/explore/components/search-ove
     RouterLink,
     RouterLinkActive,
     WeatherEffectsComponent,
-    SearchOverlayComponent,
   ],
   template: `
     <div class="app-shell" [attr.data-weather]="weatherStore.weatherTheme()">
@@ -42,21 +40,16 @@ import { SearchOverlayComponent } from './features/explore/components/search-ove
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
             <span>Forecast</span>
           </a>
-          <button class="nav-search-btn" (click)="toggleSearch()" aria-label="Search locations" title="Search">
+          <a routerLink="/explore" routerLinkActive="active" aria-label="Search locations" title="Search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <span>Search</span>
-          </button>
+          </a>
           <a routerLink="/locations" routerLinkActive="active" aria-label="Saved locations">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Saved</span>
           </a>
         </nav>
       </div>
-
-      <!-- Search overlay -->
-      @if (searchOpen()) {
-        <nimbus-search-overlay (closed)="toggleSearch()" />
-      }
     </div>
   `,
   styleUrl: './app.component.css',
@@ -67,15 +60,8 @@ export class App implements OnInit {
   private readonly locationStore = inject(LocationStore);
   private readonly locationService = inject(LocationService);
 
-  readonly searchOpen = signal(false);
-
   ngOnInit(): void {
     this.initWeather();
-    this.setupKeyboardShortcuts();
-  }
-
-  toggleSearch(): void {
-    this.searchOpen.update(v => !v);
   }
 
   private initWeather(): void {
@@ -95,19 +81,6 @@ export class App implements OnInit {
         // Default to Mumbai, India
         this.weatherStore.loadWeatherByCoords(19.0760, 72.8777, 'Mumbai');
       },
-    });
-  }
-
-  private setupKeyboardShortcuts(): void {
-    if (typeof window === 'undefined') return;
-    window.addEventListener('keydown', (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        this.toggleSearch();
-      }
-      if (e.key === 'Escape' && this.searchOpen()) {
-        this.searchOpen.set(false);
-      }
     });
   }
 }
