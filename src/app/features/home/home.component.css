@@ -1,10 +1,7 @@
-/* === HOME PAGE WRAPPER === */
 .home-page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--bg-primary); /* Deep dark background */
-  color: var(--text-primary);
   animation: fadeIn var(--duration-normal) var(--ease-decel);
 }
 
@@ -68,7 +65,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 0 var(--space-2);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-10); /* Increased from space-4 to prevent overlap with stats divider */
   margin-top: var(--space-2);
   cursor: pointer;
   user-select: none;
@@ -228,7 +225,7 @@
 .timeline-title {
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
-  color: var(--text-primary);
+  /* color inherits from .bottom-theme-section */
 }
 
 .timeline-link {
@@ -257,11 +254,12 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-2);
   border-radius: var(--radius-full);
   min-width: 64px;
-  background: transparent;
+  cursor: pointer;
   transition: all var(--duration-fast) var(--ease-default);
+  opacity: 0.8;
 }
 
 .timeline-item.active {
@@ -277,12 +275,11 @@
 .timeline-temp {
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
-  color: var(--text-primary);
 }
 
 .timeline-time {
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 /* Loading/Error States */

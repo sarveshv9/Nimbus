@@ -19,9 +19,9 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
   imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, RouterLink],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
-      <div class="loading-state">Loading...</div>
+      <div class="loading-state" style="background: var(--bg-primary); color: var(--text-primary);">Loading...</div>
     } @else {
-      <div class="details-page">
+      <div [class]="'details-page bottom-theme-section bottom-theme-section--' + weather.weatherTheme()">
         <!-- Top Blue Card -->
         <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()">
           <header class="top-nav">
@@ -65,7 +65,7 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
           }
         </div>
 
-        <!-- Bottom Dark Section -->
+        <!-- Bottom Dark Section (Inherits theme from parent) -->
         <div class="details-bottom">
           <div class="details-section-header">
             <h2 class="details-section-title">Weather Breakdown</h2>
@@ -195,8 +195,6 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: transparent;
-      color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
 
@@ -321,21 +319,20 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
       gap: 6px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-secondary);
+      opacity: 0.7;
       text-transform: uppercase;
       letter-spacing: 0;
       margin-bottom: 8px;
     }
 
     .metric-header i {
-      color: var(--text-secondary);
+      opacity: 0.8;
     }
 
     .metric-value {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       font-size: 32px;
       font-weight: 400;
-      color: var(--text-primary);
       line-height: 1.1;
       letter-spacing: normal;
     }
@@ -343,13 +340,13 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
     .metric-unit {
       font-size: 20px;
       font-weight: 400;
-      color: var(--text-secondary);
+      opacity: 0.7;
       letter-spacing: normal;
     }
 
     .metric-desc {
       font-size: 13px;
-      color: var(--text-primary);
+      opacity: 0.9;
       font-weight: 400;
       margin-top: auto;
       line-height: 1.3;

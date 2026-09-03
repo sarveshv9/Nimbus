@@ -287,6 +287,42 @@ ul, ol {
   color: #FFFFFF;
 }
 
+/* === BOTTOM SECTION THEMES === */
+.bottom-theme-section {
+  transition: background 0.5s ease, color 0.5s ease;
+  flex: 1; /* To fill the remaining screen space */
+}
+
+.bottom-theme-section--clear {
+  background: hsl(200, 40%, 90%);
+  color: #1A1A1A;
+}
+
+.bottom-theme-section--cloudy {
+  background: hsl(210, 15%, 25%);
+  color: #FFFFFF;
+}
+
+.bottom-theme-section--rain {
+  background: hsl(210, 20%, 30%);
+  color: #FFFFFF;
+}
+
+.bottom-theme-section--snow {
+  background: hsl(200, 30%, 95%);
+  color: #1A1A1A;
+}
+
+.bottom-theme-section--storm {
+  background: hsl(250, 25%, 15%);
+  color: #FFFFFF;
+}
+
+.bottom-theme-section--night {
+  background: hsl(240, 50%, 10%);
+  color: #FFFFFF;
+}
+
 .hero-theme-card .nav-btn,
 .hero-theme-card .page-header,
 .hero-theme-card .page-title {

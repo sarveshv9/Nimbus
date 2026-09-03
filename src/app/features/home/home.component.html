@@ -1,5 +1,5 @@
 @if (weather.isLoading() && !weather.hasData()) {
-  <div class="home-page">
+  <div class="home-page" style="background: var(--bg-primary); color: var(--text-primary);">
     <div class="hero-theme-card">
       <header class="top-nav">
         <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
@@ -50,7 +50,7 @@
     </div>
   </div>
 } @else {
-  <div class="home-page">
+  <div [class]="'home-page bottom-theme-section bottom-theme-section--' + weather.weatherTheme()">
     <!-- Top Blue Card -->
     <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()">
       <header class="top-nav">
@@ -126,7 +126,7 @@
       </div>
     </div>
 
-    <!-- Bottom Dark Section -->
+    <!-- Bottom Dark Section (Inherits theme from parent) -->
     <div class="home-bottom">
       <div class="timeline-header">
         <h2 class="timeline-title">Today</h2>
