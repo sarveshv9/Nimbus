@@ -267,32 +267,44 @@ ul, ol {
 .hero-theme-card--clear {
   background-image: linear-gradient(180deg, hsl(195, 85%, 65%) 0%, hsl(205, 80%, 55%) 50%, hsl(210, 75%, 50%) 100%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(205, 80%, 55%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .hero-theme-card--cloudy {
   /* Overcast - dark slate grey */
   background-image: linear-gradient(180deg, hsl(210, 15%, 45%) 0%, hsl(220, 10%, 40%) 40%, hsl(210, 10%, 35%) 100%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(220, 10%, 45%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .hero-theme-card--rain {
   background-image: linear-gradient(180deg, hsl(200, 30%, 55%) 0%, hsl(210, 25%, 50%) 50%, hsl(220, 20%, 45%) 100%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(210, 25%, 55%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .hero-theme-card--snow {
   background-image: linear-gradient(180deg, hsl(190, 40%, 90%) 0%, hsl(200, 30%, 95%) 50%, hsl(210, 20%, 90%) 100%);
   color: #1A1A1A;
+  --theme-pill-bg: hsl(200, 30%, 95%);
+  --theme-pill-text: #1A1A1A;
 }
 
 .hero-theme-card--storm {
   background-image: linear-gradient(180deg, hsl(240, 30%, 35%) 0%, hsl(250, 25%, 30%) 50%, hsl(260, 20%, 25%) 100%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(250, 25%, 35%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .hero-theme-card--night {
   background-image: linear-gradient(180deg, hsl(215, 50%, 25%) 0%, hsl(220, 55%, 15%) 50%, hsl(225, 60%, 10%) 100%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(220, 55%, 30%);
+  --theme-pill-text: #FFFFFF;
 }
 
 /* === BOTTOM SECTION THEMES === */
@@ -532,3 +544,23 @@ ul, ol {
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
+
+/* === RESPONSIVE WRAPPER (Desktop) === */
+@media (min-width: 768px) {
+  app-root {
+    display: block;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+    min-height: 100vh;
+    background: inherit;
+    position: relative;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  body {
+    background-color: #0f172a; /* Outer space dark background */
+  }
+}
+

@@ -1,5 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
@@ -16,7 +17,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 @Component({
   selector: 'nimbus-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, RouterLink],
+  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, RouterLink, DatePipe],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
       <div class="loading-state" style="background: var(--bg-primary); color: var(--text-primary);">
@@ -72,17 +73,13 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 
         <!-- Bottom Section -->
         <div class="details-bottom">
-          <div class="details-section-header">
-            <h2 class="details-section-title">Weather Breakdown</h2>
-          </div>
-
           @if (weather.currentWeather(); as current) {
 
             <!-- Row 1: Feels Like + UV — two square feature tiles -->
             <div class="bento-row bento-row--split">
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-thermometer"></i>
+                  <i class="ph ph-thermometer" style="color: var(--accent);"></i>
                   <span>Feels Like</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.feelsLike | temperature }}</div>
@@ -91,7 +88,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-sun"></i>
+                  <i class="ph ph-sun" style="color: var(--warning);"></i>
                   <span>UV Index</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.uvIndex }}</div>
@@ -102,74 +99,69 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
               </div>
             </div>
 
-            <!-- Row 2: Sun & Moon — wide card -->
-            <div class="wide-card">
-              <div class="wide-card-title">
-                <i class="ph ph-sun-horizon"></i>
-                <span>Sun &amp; Moon</span>
-              </div>
-              <div class="sun-arc-row">
-                <div class="sun-arc-point">
-                  <span class="sun-arc-label">Sunrise</span>
-                  <span class="sun-arc-value font-display">{{ formatSunTime(weather.todaySunrise()) }}</span>
+            <!-- Row 2: Wind + Precipitation -->
+            <div class="bento-row bento-row--split">
+              <div class="feature-tile">
+                <div class="feature-tile-header">
+                  <i class="ph ph-wind" style="color: var(--info);"></i>
+                  <span>Wind</span>
                 </div>
-                <div class="sun-arc-line">
-                  <i class="ph ph-sun sun-arc-icon"></i>
-                </div>
-                <div class="sun-arc-point sun-arc-point--end">
-                  <span class="sun-arc-label">Sunset</span>
-                  <span class="sun-arc-value font-display">{{ formatSunTime(weather.todaySunset()) }}</span>
+                <div class="feature-tile-value font-display">{{ current.windSpeed | windSpeed }}</div>
+                <div class="feature-tile-desc">
+                  {{ windDirectionLabel(current.windDirection) }}
                 </div>
               </div>
 
-              @if (getMoonPhase(); as moon) {
-                <div class="moon-row">
-                  <i class="ph ph-{{ moon.icon }}"></i>
-                  <span class="moon-row-label">{{ moon.phase }}</span>
-                  <span class="moon-row-value">{{ Math.round(moon.cycle * 100) }}% illuminated</span>
+              <div class="feature-tile">
+                <div class="feature-tile-header">
+                  <i class="ph ph-drop" style="color: var(--accent);"></i>
+                  <span>Precipitation</span>
+                </div>
+                <div class="feature-tile-value font-display">{{ current.precipitation }} <span style="font-size: 16px;">mm</span></div>
+                <div class="feature-tile-desc">In the last hour</div>
+              </div>
+            </div>
+
+            <!-- Row 3: Air Quality / Sunrise / Sunset -->
+            <div class="bento-row">
+              @if (weather.airQuality(); as aqi) {
+                <div class="wide-card">
+                  <div class="feature-tile-header">
+                    <i class="ph ph-leaf" style="color: #10B981;"></i>
+                    <span>Air Quality</span>
+                  </div>
+                  <div class="aqi-row" style="display: flex; gap: 16px; align-items: center;">
+                    <div class="aqi-score font-display">{{ aqi.usAqi }}</div>
+                    <div class="aqi-info">
+                      <div class="aqi-label">{{ getAqiCategory(aqi.usAqi!).label }}</div>
+                      <div class="aqi-desc">Air quality index is {{ getAqiCategory(aqi.usAqi!).label.toLowerCase() }}.</div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (weather.dailyForecast()[0]; as today) {
+                <div class="wide-card">
+                  <div class="feature-tile-header">
+                    <i class="ph ph-moon-stars" style="color: #6366F1;"></i>
+                    <span>Sun & Moon</span>
+                  </div>
+                  <div class="sun-moon-grid">
+                    <div class="sun-moon-item">
+                      <span class="sm-label">Sunrise</span>
+                      <span class="sm-value">{{ weather.todaySunrise() | date:'shortTime' }}</span>
+                    </div>
+                    <div class="sun-moon-item">
+                      <span class="sm-label">Sunset</span>
+                      <span class="sm-value">{{ weather.todaySunset() | date:'shortTime' }}</span>
+                    </div>
+                  </div>
                 </div>
               }
             </div>
 
-            <!-- Row 3: Wind + Precipitation split -->
-            <div class="bento-row bento-row--split">
-              <div class="feature-tile">
-                <div class="feature-tile-header">
-                  <i class="ph ph-wind"></i>
-                  <span>Wind</span>
-                </div>
-                <div class="feature-tile-value font-display">{{ current.windSpeed | windSpeed }}</div>
-                <div class="feature-tile-desc">{{ windDirectionLabel(current.windDirection) }} ({{ current.windDirection }}°)</div>
-                <div class="feature-tile-desc feature-tile-desc--muted">Gusts {{ current.windGusts | windSpeed }}</div>
-              </div>
-
-              <div class="feature-tile">
-                <div class="feature-tile-header">
-                  <i class="ph ph-cloud-rain"></i>
-                  <span>Precipitation</span>
-                </div>
-                <div class="feature-tile-value font-display">{{ weather.next24Hours()[0]?.precipitationProbability ?? 0 }}%</div>
-                <div class="feature-tile-desc">
-                  @if (current.precipitation > 0) {
-                    {{ current.precipitation }} mm expected
-                  } @else {
-                    No rain expected
-                  }
-                </div>
-              </div>
-            </div>
-
-            <!-- Row 4: Remaining stats — compact list card -->
+            <!-- Row 4: Remaining stats -->
             <div class="stat-list-card">
-              <div class="stat-row">
-                <div class="stat-row-icon"><i class="ph ph-drop"></i></div>
-                <div class="stat-row-body">
-                  <span class="stat-row-label">Humidity</span>
-                  <span class="stat-row-desc">{{ humidityDescription(current.humidity) }}</span>
-                </div>
-                <div class="stat-row-value font-display">{{ current.humidity }}%</div>
-              </div>
-
               <div class="stat-row">
                 <div class="stat-row-icon"><i class="ph ph-gauge"></i></div>
                 <div class="stat-row-body">
@@ -187,39 +179,6 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
                 </div>
                 <div class="stat-row-value font-display">{{ (current.visibility / 1000).toFixed(0) }} <span class="stat-row-unit">km</span></div>
               </div>
-
-              <div class="stat-row">
-                <div class="stat-row-icon"><i class="ph ph-cloud"></i></div>
-                <div class="stat-row-body">
-                  <span class="stat-row-label">Cloud Cover</span>
-                  <span class="stat-row-desc">Sky coverage</span>
-                </div>
-                <div class="stat-row-value font-display">{{ current.cloudCover }}%</div>
-              </div>
-
-              @if (weather.airQuality(); as aq) {
-                @if (aq.usAqi !== null) {
-                  <div class="stat-row">
-                    <div class="stat-row-icon"><i class="ph ph-leaf"></i></div>
-                    <div class="stat-row-body">
-                      <span class="stat-row-label">Air Quality</span>
-                      <span class="stat-row-desc">{{ getAqiCategory(aq.usAqi!).label }} @if (aq.pm25 !== null) { • PM2.5: {{ aq.pm25 }} }</span>
-                    </div>
-                    <div class="stat-row-value font-display">{{ aq.usAqi }} <span class="stat-row-unit">AQI</span></div>
-                  </div>
-                }
-
-                @if (getAllergyRisk(aq); as risk) {
-                  <div class="stat-row">
-                    <div class="stat-row-icon"><i class="ph ph-flower"></i></div>
-                    <div class="stat-row-body">
-                      <span class="stat-row-label">Allergy Risk</span>
-                      <span class="stat-row-desc">Primary: {{ risk.highest }} ({{ Math.round(risk.value) }} grains/m³)</span>
-                    </div>
-                    <div class="stat-row-value font-display">{{ risk.label }}</div>
-                  </div>
-                }
-              }
             </div>
 
           }
@@ -234,8 +193,6 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       min-height: 100vh;
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
-
-    /* === TOP HERO CARD === */
 
     .top-nav {
       display: flex;
@@ -336,8 +293,6 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       letter-spacing: 0.02em;
     }
 
-    /* === BOTTOM SECTION — bento layout === */
-
     .details-bottom {
       padding: var(--space-6) var(--space-4) var(--space-12) var(--space-4);
       display: flex;
@@ -345,17 +300,15 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       gap: var(--space-4);
     }
 
-    .details-section-header { display: none; }
-
-    /* shared surface style */
     .feature-tile,
     .wide-card,
     .stat-list-card {
-      background: var(--bg-glass);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--border-glass);
-      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
     .bento-row {
@@ -367,7 +320,6 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       grid-template-columns: 1fr 1fr;
     }
 
-    /* --- Feature tiles (feels like / uv / wind / precip) --- */
     .feature-tile {
       padding: 18px;
       min-height: 150px;
@@ -379,34 +331,28 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 13px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      opacity: 0.75;
-      margin-bottom: 12px;
+      letter-spacing: 0.08em;
+      opacity: 0.9;
+      margin-bottom: 16px;
     }
 
-    .feature-tile-header i { font-size: 16px; opacity: 0.9; }
+    .feature-tile-header i { font-size: 18px; opacity: 1; }
 
     .feature-tile-value {
-      font-size: 32px;
+      font-size: 38px;
       font-weight: 500;
       line-height: 1.1;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.04em;
     }
 
     .feature-tile-desc {
-      font-size: 12.5px;
-      opacity: 0.85;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.7;
       margin-top: auto;
-      padding-top: 10px;
-      line-height: 1.35;
-    }
-
-    .feature-tile-desc--muted {
-      opacity: 0.6;
-      padding-top: 2px;
     }
 
     .uv-track {
@@ -415,7 +361,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       border-radius: 999px;
       background: currentColor;
       opacity: 0.15;
-      margin-top: 10px;
+      margin: 10px 0;
       position: relative;
       overflow: hidden;
     }
@@ -425,101 +371,61 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
       inset: 0 auto 0 0;
       height: 100%;
       border-radius: 999px;
-      background: currentColor;
-      opacity: 1;
+      background: var(--warning);
       transition: width 0.6s var(--ease-decel, ease);
     }
 
-    /* --- Wide card: sun & moon --- */
     .wide-card {
       padding: 20px;
     }
 
-    .wide-card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      opacity: 0.75;
-      margin-bottom: 18px;
+    .aqi-score {
+      font-size: 42px;
+      font-weight: 600;
+      line-height: 1;
     }
 
-    .wide-card-title i { font-size: 16px; }
-
-    .sun-arc-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      margin-bottom: 16px;
-    }
-
-    .sun-arc-point {
+    .aqi-info {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
-    .sun-arc-point--end {
-      align-items: flex-end;
-      text-align: right;
-    }
-
-    .sun-arc-label {
-      font-size: 11px;
-      opacity: 0.6;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .sun-arc-value {
-      font-size: 20px;
-      font-weight: 500;
-    }
-
-    .sun-arc-line {
-      flex: 1;
-      height: 1px;
-      background: currentColor;
-      opacity: 0.2;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sun-arc-icon {
+    .aqi-label {
+      font-weight: 800;
       font-size: 18px;
-      opacity: 0.8;
-      background: var(--bg-glass);
-      padding: 4px;
     }
 
-    .moon-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-top: 14px;
-      border-top: 1px solid currentColor;
-      border-top-color: rgba(255,255,255,0.1);
-    }
-
-    .moon-row i { font-size: 18px; opacity: 0.85; }
-
-    .moon-row-label {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .moon-row-value {
-      margin-left: auto;
-      font-size: 12.5px;
+    .aqi-desc {
+      font-size: 13px;
+      font-weight: 500;
       opacity: 0.7;
     }
+    
+    .sun-moon-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-2);
+    }
+    
+    .sun-moon-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .sm-label {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+    
+    .sm-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
 
-    /* --- Compact stat list --- */
     .stat-list-card {
       display: flex;
       flex-direction: column;

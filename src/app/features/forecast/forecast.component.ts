@@ -103,7 +103,7 @@ import { getWeatherMeta } from '../../core/models/weather.model';
     }
 
     .nav-btn {
-      color: #1A1A1A;
+      color: inherit;
       opacity: 0.7;
       padding: var(--space-2);
     }
@@ -114,7 +114,7 @@ import { getWeatherMeta } from '../../core/models/weather.model';
       gap: 8px;
       font-size: var(--text-lg);
       font-weight: var(--weight-bold);
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .tomorrow-info {
@@ -127,9 +127,9 @@ import { getWeatherMeta } from '../../core/models/weather.model';
     .tomorrow-title {
       font-size: var(--text-lg);
       font-weight: var(--weight-medium);
-      opacity: 0.55;
+      opacity: 0.75;
       margin-bottom: var(--space-4);
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .tomorrow-weather {
@@ -151,22 +151,22 @@ import { getWeatherMeta } from '../../core/models/weather.model';
       font-weight: 900;
       letter-spacing: -3px;
       line-height: 1;
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .tomorrow-low {
       font-size: 28px;
       font-weight: var(--weight-medium);
-      opacity: 0.4;
+      opacity: 0.6;
       margin-left: 4px;
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .tomorrow-condition {
       font-size: var(--text-base);
       font-weight: var(--weight-semibold);
-      opacity: 0.6;
-      color: #1A1A1A;
+      opacity: 0.85;
+      color: inherit;
     }
 
     .hero-stats {
@@ -195,21 +195,21 @@ import { getWeatherMeta } from '../../core/models/weather.model';
     }
 
     .stat-icon {
-      opacity: 0.5;
+      opacity: 0.8;
       margin-bottom: 2px;
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .stat-val {
       font-size: var(--text-sm);
       font-weight: var(--weight-bold);
-      color: #1A1A1A;
+      color: inherit;
     }
 
     .stat-lbl {
       font-size: 10px;
-      opacity: 0.45;
-      color: #1A1A1A;
+      opacity: 0.7;
+      color: inherit;
     }
 
     .forecast-list {
