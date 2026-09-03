@@ -113,6 +113,7 @@
               <span [class.hero-accent]="line.trim() === getSwearyLabel(weather.currentWeather()?.weatherCode).accent">{{ line }}</span>
             }
           </h1>
+          <p class="hero-subtitle" style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; font-size: 13px;">{{ getWeatherMeta(weather.currentWeather()?.weatherCode).label }}</p>
         } @else {
           <h1 class="hero-headline" style="margin-bottom: 0;">
             <span>It's</span><br>
