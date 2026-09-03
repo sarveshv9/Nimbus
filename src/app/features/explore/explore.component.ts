@@ -1,6 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnInit, OnDestroy, ElementRef, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Subject, debounceTime, switchMap, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, switchMap, distinctUntilChanged, takeUntil, catchError, of } from 'rxjs';
 import { WeatherStore } from '../../core/state/weather.store';
 import { LocationStore } from '../../core/state/location.store';
 import { GeocodingService } from '../../core/services/geocoding.service';
@@ -57,6 +57,11 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
             <i class="ph ph-spinner search-spinner" style="font-size: 24px; color: var(--accent);"></i>
             <span>Searching...</span>
           </div>
+        } @else if (searchError()) {
+          <div class="search-status">
+            <i class="ph ph-warning-circle" style="font-size: 32px; color: var(--danger); margin-bottom: 8px;"></i>
+            <span>Unable to connect to search service.</span>
+          </div>
         } @else if (query().length > 0 && results().length === 0) {
           <div class="search-status">
             <span>No locations found for "{{ query() }}"</span>
@@ -69,7 +74,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
                 <button class="result-item" (click)="selectLocation(result)">
                   <div class="result-info">
                     <span class="result-name">{{ result.name }}</span>
-                    <span class="result-region">{{ formatLocation(result) }}</span>
+                    <span class="result-region">{{ result.admin1 ? result.admin1 + ', ' : '' }}{{ result.country }}</span>
                   </div>
                   @if (locationStore.isLocationSaved(result.id)) {
                     <i class="ph-fill ph-star saved-indicator"></i>
@@ -93,7 +98,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
                   <button class="result-item" (click)="selectLocation(location)">
                     <div class="result-info">
                       <span class="result-name">{{ location.name }}</span>
-                      <span class="result-region">{{ formatLocation(location) }}</span>
+                      <span class="result-region">{{ location.admin1 ? location.admin1 + ', ' : '' }}{{ location.country }}</span>
                     </div>
                     <i class="ph ph-clock-counter-clockwise" style="font-size: 20px; color: var(--text-muted);"></i>
                   </button>
@@ -110,7 +115,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
                   <button class="result-item" (click)="selectLocation(location)">
                     <div class="result-info">
                       <span class="result-name">{{ location.name }}</span>
-                      <span class="result-region">{{ formatLocation(location) }}</span>
+                      <span class="result-region">{{ location.admin1 ? location.admin1 + ', ' : '' }}{{ location.country }}</span>
                     </div>
                     <i class="ph-fill ph-star saved-indicator"></i>
                   </button>
@@ -324,6 +329,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
   readonly query = signal('');
   readonly results = signal<GeoLocation[]>([]);
   readonly isSearching = signal(false);
+  readonly searchError = signal(false);
 
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   private readonly searchSubject = new Subject<string>();
@@ -343,8 +349,14 @@ export class ExploreComponent implements OnInit, OnDestroy {
           this.isSearching.set(false);
           return [];
         }
+        this.searchError.set(false);
         this.isSearching.set(true);
-        return this.geocodingService.search(query);
+        return this.geocodingService.search(query).pipe(
+          catchError(() => {
+            this.searchError.set(true);
+            return of([]);
+          })
+        );
       }),
       takeUntil(this.destroy),
     ).subscribe(results => {
@@ -367,6 +379,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
   clearSearch(): void {
     this.query.set('');
     this.results.set([]);
+    this.searchError.set(false);
     this.searchSubject.next('');
     this.searchInput()?.nativeElement.focus();
   }

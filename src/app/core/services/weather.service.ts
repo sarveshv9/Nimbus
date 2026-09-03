@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, map, catchError, throwError, forkJoin } from 'rxjs';
+import { Observable, map, catchError, throwError, forkJoin, retry, timer } from 'rxjs';
 import {
   CurrentWeather,
   HourlyForecast,
@@ -125,6 +125,7 @@ export class WeatherService {
       .set('forecast_minutely_15', '24'); // get 24 hours of minutely data (wait, usually we just need next hour, maybe forecast_days is enough, but API supports forecast_hours, actually I'll just omit forecast_minutely_15 and let it default)
 
     return this.http.get<OpenMeteoForecastResponse>(FORECAST_API, { params }).pipe(
+      retry({ count: 2, delay: (error, retryCount) => timer(retryCount * 1000) }),
       map(response => ({
         current: this.mapCurrentWeather(response.current),
         hourly: this.mapHourlyForecast(response.hourly),
@@ -142,6 +143,7 @@ export class WeatherService {
       .set('timezone', 'auto');
 
     return this.http.get<{ current: Record<string, number | string> }>(FORECAST_API, { params }).pipe(
+      retry({ count: 2, delay: (error, retryCount) => timer(retryCount * 1000) }),
       map(response => this.mapCurrentWeather(response.current))
     );
   }
@@ -153,6 +155,7 @@ export class WeatherService {
       .set('current', AQ_PARAMS);
 
     return this.http.get<OpenMeteoAirQualityResponse>(AIR_QUALITY_API, { params }).pipe(
+      retry({ count: 2, delay: (error, retryCount) => timer(retryCount * 1000) }),
       map(response => this.mapAirQuality(response.current)),
       catchError(() => [null])
     );

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, catchError, of } from 'rxjs';
+import { Observable, map, catchError, of, throwError } from 'rxjs';
 import { GeoLocation } from '../models/location.model';
 
 const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
@@ -44,7 +44,7 @@ export class GeocodingService {
 
     return this.http.get<OpenMeteoGeocodingResponse>(GEOCODING_API, { params }).pipe(
       map(response => this.mapResults(response)),
-      catchError(() => of([]))
+      catchError((err) => throwError(() => err))
     );
   }
 

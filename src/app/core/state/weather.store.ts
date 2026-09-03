@@ -37,6 +37,8 @@ export class WeatherStore {
   readonly isLoading = signal(false);
   readonly error = signal<WeatherError | null>(null);
   readonly syncError = signal<string | null>(null);
+  readonly lastUpdated = signal<Date | null>(null);
+  private autoRefreshInterval: any;
 
   // === DERIVED STATE (computed signals) ===
 
@@ -146,6 +148,13 @@ export class WeatherStore {
 
   // === ACTIONS ===
 
+  refreshCurrentLocation(): void {
+    const loc = this.selectedLocation();
+    if (loc) {
+      this.loadWeather(loc);
+    }
+  }
+
   loadWeather(location: GeoLocation): void {
     this.selectedLocation.set(location);
     this.isLoading.set(true);
@@ -176,7 +185,9 @@ export class WeatherStore {
           if (data.minutely15) this.minutelyForecast.set(data.minutely15);
           this.airQuality.set(data.airQuality);
           this.storage.set(cacheKey, data);
+          this.lastUpdated.set(new Date());
           this.isLoading.set(false);
+          this.startAutoRefresh();
         },
         error: (err: WeatherError) => {
           if (!cached) {
@@ -214,5 +225,15 @@ export class WeatherStore {
 
   clearError(): void {
     this.error.set(null);
+  }
+
+  private startAutoRefresh(): void {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+    }
+    // Auto refresh every 15 minutes
+    this.autoRefreshInterval = setInterval(() => {
+      this.refreshCurrentLocation();
+    }, 15 * 60 * 1000);
   }
 }

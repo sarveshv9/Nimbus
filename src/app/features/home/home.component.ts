@@ -1,6 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DecimalPipe, LowerCasePipe } from '@angular/common';
+import { DatePipe, LowerCasePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
 import { LocationStore } from '../../core/state/location.store';
@@ -15,7 +15,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 @Component({
   selector: 'nimbus-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, WeatherIcon, Skeleton, WindSpeedPipe, TemperaturePipe, LowerCasePipe],
+  imports: [RouterLink, WeatherIcon, Skeleton, WindSpeedPipe, TemperaturePipe, LowerCasePipe, DatePipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })

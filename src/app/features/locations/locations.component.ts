@@ -1,5 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { catchError, of } from 'rxjs';
 import { WeatherStore } from '../../core/state/weather.store';
 import { LocationStore } from '../../core/state/location.store';
 import { WeatherService } from '../../core/services/weather.service';
@@ -33,27 +34,51 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
         @if (locationStore.hasSavedLocations()) {
           <div class="locations-list">
             @for (location of locationStore.savedLocations(); track location.id) {
-              <div class="location-card" (click)="selectLocation(location)">
-                <div class="location-info">
-                  <h3 class="location-name">{{ location.name }}</h3>
-                  <p class="location-region">{{ formatLocation(location) }}</p>
-                </div>
+              @if (locationWeather()[location.id]; as weather) {
+                <div class="location-card" (click)="selectLocation(location)">
+                  <div class="location-info">
+                    <h3 class="location-name">{{ location.name }}</h3>
+                    <p class="location-region">{{ formatLocation(location) }}</p>
+                  </div>
 
-                <div class="weather-info">
-                  @if (locationWeather()[location.id]; as weather) {
+                  <div class="weather-info">
                     <div class="weather-temp font-display">{{ weather.temperature | temperature }}</div>
                     <div class="weather-icon-wrapper">
                       <nimbus-weather-icon [weatherCode]="weather.weatherCode" [isDay]="weather.isDay" [size]="48" />
                     </div>
-                  } @else {
-                    <div class="loading-pulse"></div>
-                  }
-                </div>
+                  </div>
 
-                <button class="remove-btn" (click)="removeLocation($event, location.id)" aria-label="Remove location">
-                  <i class="ph ph-x" style="font-size: 14px;"></i>
-                </button>
-              </div>
+                  <button class="remove-btn" (click)="removeLocation($event, location.id)" aria-label="Remove location" title="Delete saved location">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              } @else if (locationErrors()[location.id]) {
+                <div class="location-card location-card--error" (click)="selectLocation(location)">
+                  <div class="location-info">
+                    <h3 class="location-name">{{ location.name }}</h3>
+                    <p class="location-region">{{ formatLocation(location) }}</p>
+                  </div>
+                  <div class="weather-info">
+                    <i class="ph ph-warning-circle" style="font-size: 24px; color: var(--danger);"></i>
+                  </div>
+                  <button class="remove-btn" (click)="removeLocation($event, location.id)" aria-label="Remove location" title="Delete saved location">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              } @else {
+                <div class="location-card location-card--loading">
+                  <div class="location-info">
+                    <h3 class="location-name">{{ location.name }}</h3>
+                    <p class="location-region">{{ formatLocation(location) }}</p>
+                  </div>
+                  <div class="weather-info">
+                    <div class="loading-pulse"></div>
+                  </div>
+                  <button class="remove-btn" (click)="removeLocation($event, location.id)" aria-label="Remove location" title="Delete saved location">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              }
             }
           </div>
         } @else {
@@ -176,13 +201,14 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--border-subtle);
       color: var(--text-muted);
       border: none;
       cursor: pointer;
+      font-size: 20px;
       transition: all var(--duration-fast) var(--ease-default);
       z-index: 10;
     }
@@ -267,6 +293,7 @@ export class LocationsComponent implements OnInit {
   readonly formatLocation = formatLocationName;
 
   readonly locationWeather = signal<Record<number, CurrentWeather>>({});
+  readonly locationErrors = signal<Record<number, boolean>>({});
 
   ngOnInit() {
     this.fetchWeatherForSavedLocations();
@@ -275,13 +302,19 @@ export class LocationsComponent implements OnInit {
   private fetchWeatherForSavedLocations() {
     const saved = this.locationStore.savedLocations();
     saved.forEach(location => {
-      this.weatherService.fetchCurrentWeatherOnly(location.latitude, location.longitude)
-        .subscribe(weather => {
+      this.weatherService.fetchCurrentWeatherOnly(location.latitude, location.longitude).pipe(
+        catchError(() => {
+          this.locationErrors.update(current => ({ ...current, [location.id]: true }));
+          return of(null);
+        })
+      ).subscribe(weather => {
+        if (weather) {
           this.locationWeather.update(current => ({
             ...current,
             [location.id]: weather
           }));
-        });
+        }
+      });
     });
   }
 

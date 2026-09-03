@@ -66,6 +66,11 @@
             <div class="location-updating">
               <span class="dot"></span> Updating
             </div>
+          } @else if (weather.lastUpdated()) {
+            <div class="location-updating" (click)="weather.refreshCurrentLocation()" style="cursor: pointer; opacity: 0.8;" title="Tap to refresh">
+              <i class="ph ph-arrows-clockwise" style="margin-right: 4px;"></i>
+              Updated {{ weather.lastUpdated() | date:'shortTime' }}
+            </div>
           }
         </div>
         <button class="nav-btn" routerLink="/settings" aria-label="Settings">
