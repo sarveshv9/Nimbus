@@ -12,20 +12,20 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
   imports: [RouterLink],
   template: `
     <div class="explore-page">
-      <!-- Top Navigation -->
-      <nav class="top-nav">
-        <a routerLink="/" class="nav-btn" aria-label="Back">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </a>
-        <div class="location-header">
-          <h1 class="page-title">Search</h1>
-        </div>
-        <div class="nav-btn" style="opacity: 0">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </div>
-      </nav>
+      <div [class]="'hero-theme-card hero-theme-card--' + weatherStore.weatherTheme()" style="padding-top: var(--space-4); padding-bottom: var(--space-10);">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+          <a routerLink="/" class="nav-btn" aria-label="Back">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </a>
+          <div class="location-header">
+            <h1 class="page-title">Search</h1>
+          </div>
+          <div class="nav-btn" style="opacity: 0">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </div>
+        </nav>
 
-      <div class="page-content">
         <!-- Search Input -->
         <div class="search-container">
           <div class="search-input-wrapper">
@@ -47,6 +47,9 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
             }
           </div>
         </div>
+      </div>
+
+      <div class="page-content">
 
         <!-- Search Results -->
         @if (isSearching()) {
@@ -124,7 +127,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-primary); /* Deep dark background */
+      background: var(--bg-primary);
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
@@ -133,76 +136,77 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--space-6);
+      margin-bottom: var(--space-6);
     }
 
     .nav-btn {
-      color: #FFFFFF;
-      opacity: 0.9;
+      color: #1A1A1A;
+      opacity: 0.7;
       padding: var(--space-2);
       cursor: pointer;
     }
 
     .page-title {
       font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
+      font-weight: 900;
+      color: #1A1A1A;
     }
 
     .page-content {
-      padding: 0 var(--space-6) var(--space-8) var(--space-6);
+      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
     }
 
     /* Search Input Styles */
     .search-container {
-      margin-bottom: var(--space-6);
+      margin-bottom: 0;
     }
     .search-input-wrapper {
       display: flex;
       align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-4) var(--space-5);
-      background: var(--bg-secondary);
-      border-radius: var(--radius-xl);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-      border: 1px solid transparent;
+      gap: var(--space-4);
+      padding: var(--space-2) 0;
+      border-bottom: 2px solid rgba(26, 26, 26, 0.2);
+      transition: border-color 0.3s ease;
     }
     .search-input-wrapper:focus-within {
-      background: var(--bg-secondary);
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent);
+      border-bottom-color: #1A1A1A;
     }
     .search-icon {
-      color: var(--accent);
+      color: rgba(26, 26, 26, 0.6);
       flex-shrink: 0;
+    }
+    .search-input-wrapper:focus-within .search-icon {
+      color: #1A1A1A;
     }
     .search-input {
       flex: 1;
-      font-size: var(--text-lg);
-      font-weight: 500;
-      color: var(--text-primary);
+      font-size: 32px;
+      font-weight: 800;
+      color: #1A1A1A;
       background: transparent;
       border: none;
       outline: none;
+      letter-spacing: -1px;
     }
     .search-input::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
+      color: rgba(26, 26, 26, 0.4);
+      font-weight: 800;
     }
     .clear-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: transparent;
+      background: var(--border-subtle);
       border: none;
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .clear-btn:hover {
+      background: var(--border-default);
       color: var(--text-primary);
     }
 
@@ -214,8 +218,9 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       justify-content: center;
       gap: var(--space-4);
       padding: var(--space-8);
-      color: var(--text-muted);
-      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 600;
     }
     .search-spinner {
       animation: spin 0.8s linear infinite;
@@ -227,25 +232,25 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
     .locations-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
     }
     .result-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      padding: var(--space-4) var(--space-5);
-      background: var(--bg-secondary);
+      padding: var(--space-5) 0;
+      background: transparent;
       border: none;
-      border-radius: var(--radius-lg);
+      border-bottom: 1px solid var(--border-default);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease;
       text-align: left;
       color: inherit;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .result-item:last-child {
+      border-bottom: none;
     }
     .result-item:hover {
-      background: rgba(255, 255, 255, 0.1);
       transform: translateX(4px);
     }
     .result-info {
@@ -254,13 +259,15 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       gap: 4px;
     }
     .result-name {
-      font-size: var(--text-base);
-      font-weight: 500;
+      font-size: 24px;
+      font-weight: 800;
       color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
     .result-region {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
 
     /* Sections */

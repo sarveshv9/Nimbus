@@ -15,17 +15,19 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
   template: `
     <div class="locations-page">
       <!-- Top Navigation -->
-      <nav class="top-nav">
-        <a routerLink="/" class="nav-btn" aria-label="Back">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </a>
-        <div class="location-header">
-          <h1 class="page-title">Saved Locations</h1>
-        </div>
-        <div class="nav-btn" style="opacity: 0">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </div>
-      </nav>
+      <div [class]="'hero-theme-card hero-theme-card--' + weatherStore.weatherTheme()" style="padding-top: var(--space-4); padding-bottom: var(--space-6);">
+        <nav class="top-nav">
+          <a routerLink="/" class="nav-btn" aria-label="Back">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </a>
+          <div class="location-header">
+            <h1 class="page-title">Saved Locations</h1>
+          </div>
+          <div class="nav-btn" style="opacity: 0">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </div>
+        </nav>
+      </div>
 
       <div class="page-content">
         @if (locationStore.hasSavedLocations()) {
@@ -70,7 +72,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-primary); /* Deep dark background */
+      background: var(--bg-primary);
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
@@ -79,47 +81,49 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--space-6);
+      margin-bottom: var(--space-2);
     }
 
     .nav-btn {
-      color: #FFFFFF;
-      opacity: 0.9;
+      color: #1A1A1A;
+      opacity: 0.7;
       padding: var(--space-2);
       cursor: pointer;
     }
 
     .page-title {
       font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
+      font-weight: 900;
+      color: #1A1A1A;
     }
 
     .page-content {
-      padding: 0 var(--space-6) var(--space-8) var(--space-6);
+      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
     }
 
     .locations-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
     }
 
     .location-card {
       position: relative;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-5) var(--space-6);
+      background: transparent;
+      padding: var(--space-6) 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border-default);
       cursor: pointer;
-      overflow: hidden;
       transition: transform var(--duration-fast) var(--ease-default);
     }
 
+    .location-card:last-child {
+      border-bottom: none;
+    }
+
     .location-card:hover {
-      transform: translateY(-2px);
+      transform: translateX(4px);
     }
 
     .location-info {
@@ -130,30 +134,34 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
     }
 
     .location-name {
-      font-size: var(--text-xl);
-      font-weight: var(--weight-bold);
+      font-size: 32px;
+      font-weight: 900;
       color: var(--text-primary);
       margin: 0;
+      letter-spacing: -1px;
     }
 
     .location-region {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
       margin: 0;
     }
 
     .weather-info {
       display: flex;
       align-items: center;
-      gap: var(--space-3);
+      gap: var(--space-4);
       z-index: 1;
-      padding-right: var(--space-6); /* Make room for remove button */
+      padding-right: var(--space-10); /* Make room for remove button */
     }
 
     .weather-temp {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-bold);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 40px;
+      font-weight: 900;
       color: var(--text-primary);
+      letter-spacing: -2px;
     }
 
     .weather-icon-wrapper {
@@ -162,15 +170,16 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
     .remove-btn {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--border-subtle);
       color: var(--text-muted);
       border: none;
       cursor: pointer;
@@ -187,7 +196,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--border-default);
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
@@ -200,38 +209,59 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-3);
+      justify-content: center;
       text-align: center;
-      padding: var(--space-12);
-      margin-top: var(--space-8);
+      padding: var(--space-12) var(--space-6);
+      color: var(--text-secondary);
+      height: 60vh;
     }
+
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: var(--space-6);
+      opacity: 0.3;
+    }
+
     .empty-state h3 {
-      font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
+      font-size: 32px;
+      font-weight: 900;
       color: var(--text-primary);
+      margin-bottom: var(--space-3);
+      letter-spacing: -1px;
+      line-height: 1.1;
     }
+
     .empty-state p {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      max-width: 300px;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--space-8);
+      max-width: 280px;
+      line-height: 1.5;
     }
-    .search-btn {
-      margin-top: var(--space-4);
-      padding: var(--space-3) var(--space-6);
-      background-color: var(--accent);
+
+    .primary-btn {
+      background: var(--accent);
       color: var(--bg-primary);
+      border: none;
       border-radius: var(--radius-full);
-      font-weight: var(--weight-semibold);
+      padding: var(--space-3) var(--space-8);
+      font-size: 14px;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-size: var(--text-xs);
-      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-default);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
     }
   `],
 })
 export class LocationsComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly weatherStore = inject(WeatherStore);
+  readonly weatherStore = inject(WeatherStore);
   private readonly weatherService = inject(WeatherService);
   readonly locationStore = inject(LocationStore);
   readonly formatLocation = formatLocationName;

@@ -23,7 +23,7 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
     } @else {
       <div class="details-page">
         <!-- Top Blue Card -->
-        <div class="hero-blue-card">
+        <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()">
           <header class="top-nav">
             <button class="nav-btn" routerLink="/" aria-label="Back">
               <i class="ph ph-caret-left" style="font-size: 28px;"></i>
@@ -38,42 +38,29 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
           </header>
 
           @if (weather.currentWeather(); as current) {
-            <div class="hero-summary">
-              <div class="hero-weather-row">
-                <nimbus-weather-icon [weatherCode]="current.weatherCode" [size]="90" [isDay]="current.isDay" />
-                <div class="hero-temp-group">
-                  <span class="hero-temp-val">{{ current.temperature | temperature:'value' }}</span>
-                  <span class="hero-temp-deg">°</span>
-                </div>
+            <div class="hero-weather">
+              <div class="hero-icon-container">
+                <nimbus-weather-icon [weatherCode]="current.weatherCode" [size]="72" [isDay]="current.isDay" />
               </div>
+              
+              <h1 class="hero-headline">{{ locationName }}</h1>
+              
+              <p class="hero-subtitle">
+                {{ getWeatherMeta(current.weatherCode).label }} • {{ current.temperature | temperature:'value' }}°
+              </p>
 
-              <h2 class="hero-condition">{{ getWeatherMeta(current.weatherCode).label }}</h2>
-              <p class="hero-location-name">{{ locationName }}</p>
+              <div class="hero-divider"></div>
 
               @if (weather.todayHighLow(); as hl) {
-                <div class="hero-high-low">
-                  <span class="hl-badge"><i class="ph ph-arrow-up"></i> H: {{ hl.high | temperature }}</span>
-                  <span class="hl-badge"><i class="ph ph-arrow-down"></i> L: {{ hl.low | temperature }}</span>
+                <div class="hero-bottom-bar">
+                  <div class="hero-bottom-info">
+                    <span class="hero-bottom-label">High: {{ hl.high | temperature }}</span>
+                  </div>
+                  <div class="hero-bottom-info">
+                    <span class="hero-bottom-label">Low: {{ hl.low | temperature }}</span>
+                  </div>
                 </div>
               }
-            </div>
-
-            <div class="hero-stats">
-              <div class="hero-stat">
-                <i class="ph ph-wind stat-icon" style="font-size: 24px;"></i>
-                <span class="stat-val">{{ current.windSpeed | windSpeed }}</span>
-                <span class="stat-lbl">Wind</span>
-              </div>
-              <div class="hero-stat">
-                <i class="ph ph-drop stat-icon" style="font-size: 24px;"></i>
-                <span class="stat-val">{{ current.humidity }}%</span>
-                <span class="stat-lbl">Humidity</span>
-              </div>
-              <div class="hero-stat">
-                <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
-                <span class="stat-val">{{ weather.next24Hours()[0]?.precipitationProbability ?? 0 }}%</span>
-                <span class="stat-lbl">Chance of rain</span>
-              </div>
             </div>
           }
         </div>
@@ -208,29 +195,21 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: linear-gradient(180deg, #1E66FF 0%, #1a4fcc 25%, #1a3d8f 50%, #152c5e 75%, #0F121C 100%);
-      color: #FFFFFF;
+      background: transparent;
+      color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
 
-    /* === TOP BLUE HERO CARD (matching home) === */
-    .hero-blue-card {
-      background: transparent;
-      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
-      display: flex;
-      flex-direction: column;
-      color: #FFFFFF;
-    }
+    /* === TOP HERO CARD === */
 
     .top-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--space-6);
+      margin-bottom: var(--space-2);
     }
 
     .nav-btn {
-      color: #FFFFFF;
       opacity: 0.9;
       padding: var(--space-2);
       cursor: pointer;
@@ -240,133 +219,82 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
     }
 
     .page-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: var(--text-lg);
-      font-weight: var(--weight-bold);
+      display: none; /* Hide details header for clean iOS look */
     }
 
-    .hero-summary {
+    .hero-weather {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin: var(--space-2) 0 var(--space-8) 0;
-    }
-
-    .hero-weather-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-4);
-      margin-bottom: var(--space-2);
-    }
-
-    .hero-temp-group {
-      display: flex;
       align-items: flex-start;
+      padding: 0 var(--space-2);
+      margin-bottom: var(--space-4);
+      margin-top: var(--space-2);
     }
 
-    .hero-temp-val {
-      font-family: var(--font-display);
-      font-size: 80px;
-      font-weight: var(--weight-bold);
-      letter-spacing: -2px;
-      line-height: 0.85;
+    .hero-icon-container {
+      margin-bottom: var(--space-4);
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
     }
 
-    .hero-temp-deg {
-      font-size: 36px;
+    .hero-headline {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(2rem, 7vw, 3rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0;
+      margin-bottom: var(--space-4);
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-base);
       font-weight: var(--weight-medium);
-      margin-top: -4px;
+      opacity: 0.8;
+      line-height: 1.5;
+      margin: 0;
     }
 
-    .hero-condition {
-      font-size: var(--text-2xl);
-      font-weight: var(--weight-semibold);
-      margin-bottom: 2px;
+    .hero-divider {
+      width: 100%;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.15;
+      margin: var(--space-6) 0 var(--space-4) 0;
     }
 
-    .hero-location-name {
-      font-size: var(--text-sm);
-      opacity: 0.85;
-      font-weight: var(--weight-medium);
-      margin-bottom: var(--space-3);
-    }
-
-    .hero-high-low {
+    .hero-bottom-bar {
       display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      gap: var(--space-8);
+    }
+
+    .hero-bottom-info {
+      display: flex;
+      align-items: center;
       gap: var(--space-3);
     }
 
-    .hl-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 12px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: var(--radius-full);
-      font-size: 11px;
-      font-weight: var(--weight-semibold);
-      letter-spacing: 0.2px;
-    }
-
-    .hero-stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 var(--space-4);
-      position: relative;
-    }
-
-    .hero-stats::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 10%;
-      right: 10%;
-      height: 1px;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .hero-stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .stat-icon {
-      opacity: 0.8;
-      margin-bottom: 2px;
-    }
-
-    .stat-val {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-semibold);
-    }
-
-    .stat-lbl {
-      font-size: 10px;
+    .hero-bottom-label {
+      font-size: 13px;
+      font-weight: var(--weight-bold);
       opacity: 0.7;
+      letter-spacing: 0.02em;
     }
 
-    /* === BOTTOM SECTION (Frosted Glass Cards) === */
+    /* === BOTTOM SECTION (Metric Cards iOS Style) === */
     .details-bottom {
-      padding: var(--space-6) var(--space-6) var(--space-12) var(--space-6);
+      padding: var(--space-6) var(--space-4) var(--space-12) var(--space-4);
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
     }
 
     .details-section-header {
-      margin-bottom: var(--space-1);
-    }
-
-    .details-section-title {
-      font-size: var(--text-lg);
-      font-weight: var(--weight-bold);
-      color: rgba(255, 255, 255, 0.9);
+      display: none; /* Hide for true iOS look, as iOS doesn't have a generic breakdown title */
     }
 
     .metrics-grid {
@@ -376,52 +304,56 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
     }
 
     .metric-card {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--radius-xl);
-      padding: var(--space-4) var(--space-4);
       display: flex;
       flex-direction: column;
-      gap: var(--space-1);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 160px;
+      border: 1px solid var(--border-glass);
     }
 
     .metric-header {
       display: flex;
       align-items: center;
-      gap: var(--space-2);
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semibold);
-      color: rgba(255, 255, 255, 0.6);
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
+      margin-bottom: 8px;
     }
 
     .metric-header i {
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-secondary);
     }
 
     .metric-value {
-      font-size: var(--text-2xl);
-      font-weight: var(--weight-bold);
-      color: #FFFFFF;
-      margin-top: var(--space-1);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--text-primary);
       line-height: 1.1;
+      letter-spacing: normal;
     }
 
     .metric-unit {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-normal);
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: normal;
     }
 
     .metric-desc {
-      font-size: var(--text-xs);
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: var(--weight-medium);
-      margin-top: 2px;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 400;
+      margin-top: auto;
       line-height: 1.3;
+      padding-top: 16px;
     }
 
     .loading-state {
@@ -429,7 +361,7 @@ import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model'
       align-items: center;
       justify-content: center;
       height: 100vh;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
     }
   `],
 })

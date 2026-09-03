@@ -187,22 +187,31 @@ ul, ol {
   --gradient-blue: linear-gradient(160deg, #35C4FF, #1E66FF);
 }
 
-/* Light Theme (Override to be the same, since we want a unified specific layout) */
+/* Light Theme */
 [data-theme="light"] {
-  --bg-primary: #0F121C;
-  --bg-secondary: #171A26;
-  --bg-surface: #0F121C;
-  --bg-surface-hover: #1A1D2C;
-  --bg-surface-solid: #0F121C;
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F1F5F9;
+  --bg-surface-solid: #FFFFFF;
+  --bg-overlay: rgba(255, 255, 255, 0.6);
   
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0AEC0;
-  --text-muted: #718096;
-  --text-inverse: #0F121C;
+  --text-primary: #0F121C;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+  
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.2);
   
   --accent: #2185FF;
-  --accent-hover: #33C5FF;
+  --accent-hover: #1E66FF;
   --accent-rgb: 33, 133, 255;
+
+  /* Glassmorphism */
+  --bg-glass: rgba(255, 255, 255, 0.4);
+  --border-glass: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark Theme */
@@ -212,20 +221,77 @@ ul, ol {
   --bg-surface: #0F121C;
   --bg-surface-hover: #1A1D2C;
   --bg-surface-solid: #0F121C;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
   
   --text-primary: #FFFFFF;
   --text-secondary: #A0AEC0;
   --text-muted: #718096;
   --text-inverse: #0F121C;
   
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  
   --accent: #2185FF;
   --accent-hover: #33C5FF;
   --accent-rgb: 33, 133, 255;
+
+  /* Glassmorphism */
+  --bg-glass: rgba(0, 0, 0, 0.2);
+  --border-glass: rgba(255, 255, 255, 0.1);
 }
 
 
 
 /* === UTILITY CLASSES === */
+.hero-theme-card {
+  background: linear-gradient(180deg, hsl(200, 50%, 65%) 0%, hsl(220, 45%, 70%) 40%, hsl(210, 50%, 65%) 100%);
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  color: #FFFFFF;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+.hero-theme-card--clear {
+  background: linear-gradient(180deg, hsl(200, 50%, 65%) 0%, hsl(220, 45%, 70%) 40%, hsl(210, 50%, 65%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card--cloudy {
+  background: linear-gradient(180deg, hsl(210, 20%, 65%) 0%, hsl(220, 15%, 70%) 40%, hsl(210, 15%, 60%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card--rain {
+  background: linear-gradient(180deg, hsl(200, 30%, 55%) 0%, hsl(210, 25%, 50%) 50%, hsl(220, 20%, 45%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card--snow {
+  background: linear-gradient(180deg, hsl(190, 30%, 75%) 0%, hsl(200, 25%, 80%) 50%, hsl(210, 20%, 75%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card--storm {
+  background: linear-gradient(180deg, hsl(240, 30%, 35%) 0%, hsl(250, 25%, 30%) 50%, hsl(260, 20%, 25%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card--night {
+  background: linear-gradient(180deg, hsl(230, 40%, 25%) 0%, hsl(240, 50%, 20%) 50%, hsl(250, 40%, 15%) 100%);
+  color: #FFFFFF;
+}
+
+.hero-theme-card .nav-btn,
+.hero-theme-card .page-header,
+.hero-theme-card .page-title {
+  color: inherit;
+}
+
 .glass {
   background: var(--bg-surface);
   border: var(--card-border);

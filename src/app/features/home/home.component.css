@@ -9,20 +9,7 @@
 }
 
 /* === TOP BLUE CARD — Now with gradient matching the Dribbble design === */
-.hero-blue-card {
-  background: linear-gradient(180deg, 
-    hsl(200, 40%, 82%) 0%,        /* Soft blue-grey top */
-    hsl(220, 30%, 85%) 30%,       /* Cool lavender mid */
-    hsl(250, 35%, 82%) 70%,       /* Warm lavender */
-    hsl(270, 30%, 80%) 100%       /* Subtle purple bottom */
-  );
-  border-bottom-left-radius: 40px;
-  border-bottom-right-radius: 40px;
-  padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
-  display: flex;
-  flex-direction: column;
-  color: #1A1A1A;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+.hero-theme-card {
   flex: 1;
 }
 
@@ -102,11 +89,12 @@
   font-weight: 900;
   line-height: 0.95;
   letter-spacing: -0.03em;
-  color: #1A1A1A;
+  letter-spacing: -0.03em;
   margin: 0;
   margin-bottom: var(--space-4);
   text-transform: capitalize;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .hero-headline span {
@@ -115,13 +103,13 @@
 
 /* Accent words (the weather condition — highlighted in a subtle way) */
 .hero-accent {
-  color: #1A1A1A; /* Keep same color like the Dribbble design — all black, bold */
+  opacity: 0.9;
 }
 
 .hero-subtitle {
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
-  color: rgba(26, 26, 26, 0.55);
+  opacity: 0.8;
   line-height: 1.5;
   margin: 0;
   margin-bottom: auto;
@@ -132,7 +120,8 @@
 .hero-divider {
   width: 100%;
   height: 1px;
-  background: rgba(26, 26, 26, 0.15);
+  background: currentColor;
+  opacity: 0.15;
   margin: var(--space-6) 0 var(--space-4) 0;
 }
 
@@ -155,7 +144,7 @@
 .hero-bottom-label {
   font-size: 11px;
   font-weight: var(--weight-semibold);
-  color: rgba(26, 26, 26, 0.5);
+  opacity: 0.7;
   line-height: 1.4;
   letter-spacing: 0.01em;
 }
@@ -164,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  border-left: 2px solid #1A1A1A;
+  border-left: 2px solid currentColor;
   padding-left: var(--space-4);
 }
 
@@ -172,7 +161,6 @@
   font-family: 'Inter', -apple-system, sans-serif;
   font-size: clamp(1.5rem, 6vw, 2.2rem);
   font-weight: 900;
-  color: #1A1A1A;
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -195,7 +183,8 @@
   left: 10%;
   right: 10%;
   height: 1px;
-  background: rgba(26, 26, 26, 0.1);
+  background: currentColor;
+  opacity: 0.1;
 }
 
 .hero-stat {
@@ -206,21 +195,20 @@
 }
 
 .stat-icon {
-  opacity: 0.6;
+  opacity: 0.7;
   margin-bottom: 2px;
-  color: #1A1A1A;
 }
 
 .stat-val {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  color: #1A1A1A;
 }
 
 .stat-lbl {
   font-size: 10px;
-  opacity: 0.5;
-  color: #1A1A1A;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* === BOTTOM DARK SECTION === */

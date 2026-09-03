@@ -1,6 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SettingsStore } from '../../core/state/settings.store';
+import { WeatherStore } from '../../core/state/weather.store';
 import { WindSpeedUnit } from '../../core/models/settings.model';
 
 @Component({
@@ -10,17 +11,19 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
   template: `
     <div class="settings-page">
       <!-- Top Navigation -->
-      <nav class="top-nav">
-        <a routerLink="/" class="nav-btn" aria-label="Back">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </a>
-        <div class="location-header">
-          <h1 class="page-title">Settings</h1>
-        </div>
-        <div class="nav-btn" style="opacity: 0">
-          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
-        </div>
-      </nav>
+      <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()" style="padding-top: var(--space-4); padding-bottom: var(--space-6);">
+        <nav class="top-nav">
+          <a routerLink="/" class="nav-btn" aria-label="Back">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </a>
+          <div class="location-header">
+            <h1 class="page-title">Settings</h1>
+          </div>
+          <div class="nav-btn" style="opacity: 0">
+            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+          </div>
+        </nav>
+      </div>
 
       <div class="page-content">
         <!-- Units -->
@@ -68,6 +71,44 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
                       [attr.aria-checked]="settings.windSpeedUnit() === unit.value"
                     >{{ unit.label }}</button>
                   }
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Theme -->
+        <section>
+          <h2 class="section-label">Appearance</h2>
+          <div class="settings-card">
+            <div class="setting-group">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Theme</span>
+                  <span class="setting-desc">Choose between light, dark, or system default</span>
+                </div>
+                <div class="toggle-group" role="radiogroup" aria-label="Theme mode">
+                  <button
+                    class="toggle-btn"
+                    [class.active]="settings.themeMode() === 'light'"
+                    (click)="settings.setThemeMode('light')"
+                    role="radio"
+                    [attr.aria-checked]="settings.themeMode() === 'light'"
+                  >Light</button>
+                  <button
+                    class="toggle-btn"
+                    [class.active]="settings.themeMode() === 'dark'"
+                    (click)="settings.setThemeMode('dark')"
+                    role="radio"
+                    [attr.aria-checked]="settings.themeMode() === 'dark'"
+                  >Dark</button>
+                  <button
+                    class="toggle-btn"
+                    [class.active]="settings.themeMode() === 'system'"
+                    (click)="settings.setThemeMode('system')"
+                    role="radio"
+                    [attr.aria-checked]="settings.themeMode() === 'system'"
+                  >Auto</button>
                 </div>
               </div>
             </div>
@@ -215,7 +256,7 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-primary); /* Deep dark background */
+      background: var(--bg-primary);
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
@@ -224,23 +265,24 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--space-6);
+      margin-bottom: var(--space-2);
     }
 
     .nav-btn {
-      color: #FFFFFF;
-      opacity: 0.9;
+      color: #1A1A1A;
+      opacity: 0.7;
       padding: var(--space-2);
       cursor: pointer;
     }
 
     .page-title {
       font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
+      font-weight: 900;
+      color: #1A1A1A;
     }
 
     .page-content {
-      padding: 0 var(--space-6) var(--space-8) var(--space-6);
+      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
       display: flex;
       flex-direction: column;
       gap: var(--space-6);
@@ -252,19 +294,17 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
     }
 
     .section-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       margin-bottom: var(--space-3);
     }
 
     .settings-card {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-5) var(--space-6);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      background: transparent;
+      padding: 0;
     }
 
     .setting-group {
@@ -276,62 +316,62 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       align-items: center;
       justify-content: space-between;
       gap: var(--space-4);
-      padding: var(--space-4) 0;
+      padding: var(--space-5) 0;
+      border-bottom: 1px solid var(--border-default);
     }
     .setting-row:first-child {
       padding-top: 0;
     }
     .setting-row:last-child {
-      padding-bottom: 0;
-    }
-    .setting-row + .setting-row {
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: none;
     }
     .setting-info { flex: 1; }
     .setting-name {
       display: block;
-      font-size: var(--text-base);
-      font-weight: 500;
+      font-size: 22px;
+      font-weight: 800;
       color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
     .setting-desc {
       display: block;
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.4;
     }
 
     .toggle-group {
       display: flex;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-lg);
-      padding: 2px;
+      background: var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 4px;
     }
     .toggle-btn {
       padding: var(--space-2) var(--space-4);
-      font-size: var(--text-sm);
-      font-weight: 500;
-      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
       background: transparent;
       border: none;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-full);
       cursor: pointer;
       transition: all var(--duration-fast) var(--ease-default);
     }
     .toggle-btn:hover { color: var(--text-primary); }
     .toggle-btn.active {
-      background: var(--accent);
-      color: var(--bg-primary);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     /* Switch */
     .switch {
       position: relative;
-      width: 48px;
-      height: 28px;
-      background: rgba(255, 255, 255, 0.1);
+      width: 56px;
+      height: 32px;
+      background: var(--border-default);
       border-radius: var(--radius-full);
       border: none;
       cursor: pointer;
@@ -343,24 +383,25 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
     }
     .switch-thumb {
       position: absolute;
-      top: 2px;
-      left: 2px;
+      top: 4px;
+      left: 4px;
       width: 24px;
       height: 24px;
       background: white;
       border-radius: 50%;
       transition: transform var(--duration-fast) var(--ease-bounce);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     .switch.active .switch-thumb {
-      transform: translateX(20px);
+      transform: translateX(24px);
     }
 
     /* About */
     .about-section {
       display: flex;
       flex-direction: column;
-      gap: var(--space-5);
+      gap: var(--space-6);
+      padding-top: var(--space-4);
     }
     .about-header {
       display: flex;
@@ -368,60 +409,63 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       gap: var(--space-4);
     }
     .about-logo {
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--border-subtle);
+      border-radius: 20px;
     }
     .about-title {
-      font-size: var(--text-xl);
-      font-weight: var(--weight-bold);
+      font-size: 32px;
+      font-weight: 900;
       color: var(--text-primary);
       margin: 0;
+      letter-spacing: -1px;
     }
     .about-version {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
       margin-top: 4px;
     }
     .about-desc {
-      font-size: var(--text-sm);
+      font-size: 16px;
       color: var(--text-secondary);
       line-height: 1.6;
       margin: 0;
+      font-weight: 500;
     }
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-3);
-      padding: var(--space-4);
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      gap: var(--space-4) var(--space-6);
+      padding: var(--space-5) 0;
+      border-top: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-default);
+      background: transparent;
     }
     .tech-item {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
     .tech-label {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 800;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
     }
     .tech-value {
-      font-size: var(--text-sm);
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 800;
       color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
     .architecture-list {
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--border-subtle);
       padding-top: var(--space-4);
     }
     .architecture-list h4 {
@@ -455,6 +499,7 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
 })
 export class SettingsComponent {
   readonly settings = inject(SettingsStore);
+  readonly weather = inject(WeatherStore);
 
   readonly windUnits: { value: WindSpeedUnit; label: string }[] = [
     { value: 'kmh', label: 'km/h' },
