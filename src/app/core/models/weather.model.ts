@@ -106,19 +106,19 @@ export interface SwearyLabel {
 }
 
 export const SWEARY_LABELS: Record<WeatherCondition, SwearyLabel> = {
-  'clear':          { headline: "It's fucking\nbeautiful.",  accent: 'beautiful.',  subtitle: 'You can look outside to get more information.' },
-  'partly-cloudy':  { headline: "It's kinda\ncloudy.",       accent: 'cloudy.',     subtitle: 'The sun is playing hide and seek, basically.' },
-  'cloudy':         { headline: "It's one giant\nfucking cloud.", accent: 'cloud.',      subtitle: 'The sky looks like a dirty dishrag.' },
-  'foggy':          { headline: "You can't\nsee shit.",      accent: 'see shit.',   subtitle: "It's foggy as hell out there." },
-  'drizzle':        { headline: "It's fucking\ndrizzling.",   accent: 'drizzling.',  subtitle: "Not quite rain, not quite dry. Just annoying." },
-  'rain':           { headline: "It's fucking\nraining.",     accent: 'raining.',    subtitle: 'You can look outside to get more information.' },
-  'freezing-rain':  { headline: "It's freezing\nfucking rain.", accent: 'rain.',     subtitle: "Nature's way of saying stay the fuck inside." },
-  'snow':           { headline: "It's fucking\nsnowing.",     accent: 'snowing.',    subtitle: "Frozen sky dandruff is falling. Enjoy." },
-  'snow-grains':    { headline: "It's fucking\nsnowing.",     accent: 'snowing.',    subtitle: "Tiny ice bullets. How delightful." },
-  'rain-showers':   { headline: "It's fucking\npouring.",     accent: 'pouring.',    subtitle: "Expect changes throughout the day." },
-  'snow-showers':   { headline: "Shit, it's\nsnowing hard.",  accent: 'snowing hard.', subtitle: "Mother nature lost her mind." },
-  'thunderstorm':   { headline: "Holy shit,\na storm.",       accent: 'a storm.',    subtitle: "Thunder, lightning, the whole damn show." },
-  'unknown':        { headline: "No fucking\nclue.",          accent: 'clue.',       subtitle: "Even the weather doesn't know what it's doing." },
+  'clear':          { headline: "It's fucking\nclear outside.",          accent: 'clear',         subtitle: 'You can look outside to get more information.' },
+  'partly-cloudy':  { headline: "It's partly fucking\ncloudy right now.",accent: 'cloudy',        subtitle: 'The sun is playing hide and seek, basically.' },
+  'cloudy':         { headline: "It's totally fucking\ncloudy outside.", accent: 'cloudy',        subtitle: 'The sky looks like a dirty dishrag.' },
+  'foggy':          { headline: "It's fucking\nfoggy right now.",        accent: 'foggy',         subtitle: "You can't see shit out there." },
+  'drizzle':        { headline: "It's fucking\ndrizzling right now.",    accent: 'drizzling',     subtitle: "Not quite rain, not quite dry. Just annoying." },
+  'rain':           { headline: "It's fucking\nraining right now.",      accent: 'raining',       subtitle: 'Nature is currently taking a leak on you.' },
+  'freezing-rain':  { headline: "It's freezing fucking\nrain outside.",  accent: 'rain',          subtitle: "Nature's way of saying stay the fuck inside." },
+  'snow':           { headline: "It's fucking\nsnowing right now.",      accent: 'snowing',       subtitle: "Frozen sky dandruff is falling. Enjoy." },
+  'snow-grains':    { headline: "It's fucking\nsleeting right now.",     accent: 'sleeting',      subtitle: "Tiny ice bullets. How delightful." },
+  'rain-showers':   { headline: "It's fucking\npouring right now.",      accent: 'pouring',       subtitle: "Expect changes throughout the damn day." },
+  'snow-showers':   { headline: "It's snowing fucking\nhard right now.", accent: 'hard',          subtitle: "Mother nature lost her damn mind." },
+  'thunderstorm':   { headline: "There's a fucking\nstorm right now.",   accent: 'storm',         subtitle: "Thunder, lightning, the whole damn show." },
+  'unknown':        { headline: "No fucking clue\nwhat it's doing.",     accent: 'clue',          subtitle: "Even the app doesn't know what it's doing." },
 };
 
 /**
