@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
 import {
   CurrentWeather,
   HourlyForecast,
@@ -15,6 +16,7 @@ import {
 import { GeoLocation } from '../models/location.model';
 import { WeatherService } from '../services/weather.service';
 import { StorageService } from '../services/storage.service';
+import { GeocodingService } from '../services/geocoding.service';
 
 const STORAGE_KEY_LOCATION = 'nimbus-last-location';
 
@@ -22,6 +24,8 @@ const STORAGE_KEY_LOCATION = 'nimbus-last-location';
 export class WeatherStore {
   private readonly weatherService = inject(WeatherService);
   private readonly storage = inject(StorageService);
+  private readonly geocodingService = inject(GeocodingService);
+  private fetchSubscription: Subscription | null = null;
 
   // === PRIMARY STATE (writable signals) ===
   readonly currentWeather = signal<CurrentWeather | null>(null);
@@ -32,6 +36,7 @@ export class WeatherStore {
   readonly selectedLocation = signal<GeoLocation | null>(null);
   readonly isLoading = signal(false);
   readonly error = signal<WeatherError | null>(null);
+  readonly syncError = signal<string | null>(null);
 
   // === DERIVED STATE (computed signals) ===
 
@@ -145,6 +150,7 @@ export class WeatherStore {
     this.selectedLocation.set(location);
     this.isLoading.set(true);
     this.error.set(null);
+    this.syncError.set(null);
 
     const cacheKey = `nimbus-weather-${location.latitude.toFixed(4)}-${location.longitude.toFixed(4)}`;
     const cached = this.storage.get<WeatherData>(cacheKey);
@@ -156,7 +162,11 @@ export class WeatherStore {
       this.airQuality.set(cached.airQuality);
     }
 
-    this.weatherService
+    if (this.fetchSubscription) {
+      this.fetchSubscription.unsubscribe();
+    }
+
+    this.fetchSubscription = this.weatherService
       .fetchWeatherData(location.latitude, location.longitude)
       .subscribe({
         next: (data: WeatherData) => {
@@ -171,22 +181,30 @@ export class WeatherStore {
         error: (err: WeatherError) => {
           if (!cached) {
             this.error.set(err);
+          } else {
+            this.syncError.set('Background sync failed. Showing cached data.');
           }
           this.isLoading.set(false);
         },
       });
   }
 
-  loadWeatherByCoords(lat: number, lon: number, name: string = 'Current Location'): void {
-    const location: GeoLocation = {
-      id: 0,
-      name,
-      latitude: lat,
-      longitude: lon,
-      country: '',
-      countryCode: '',
-    };
-    this.loadWeather(location);
+  loadWeatherByCoords(lat: number, lon: number): void {
+    this.isLoading.set(true);
+    this.geocodingService.reverseGeocode(lat, lon).subscribe(loc => {
+      // Create a unique ID using coordinates for geolocated places to avoid id collisions
+      const generatedId = Math.abs(Math.floor(lat * 1000) + Math.floor(lon * 1000));
+      const fullLocation: GeoLocation = {
+        id: generatedId,
+        name: loc.name || 'Current Location',
+        latitude: lat,
+        longitude: lon,
+        country: loc.country || '',
+        countryCode: loc.countryCode || '',
+        admin1: loc.admin1,
+      };
+      this.loadWeather(fullLocation);
+    });
   }
 
   /** Loads the last used location from localStorage */

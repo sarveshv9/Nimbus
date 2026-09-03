@@ -51,9 +51,9 @@ import { getWeatherMeta } from '../../core/models/weather.model';
               <span class="stat-lbl">Wind</span>
             </div>
             <div class="hero-stat">
-              <i class="ph ph-drop stat-icon" style="font-size: 24px;"></i>
-              <span class="stat-val">50%</span>
-              <span class="stat-lbl">Humidity</span>
+              <i class="ph ph-sun stat-icon" style="font-size: 24px;"></i>
+              <span class="stat-val">{{ tomorrow()?.uvIndexMax }}</span>
+              <span class="stat-lbl">Max UV</span>
             </div>
             <div class="hero-stat">
               <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>

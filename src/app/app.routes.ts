@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { locationGuard } from './core/guards/location.guard';
 
 export const routes: Routes = [
   {
@@ -18,12 +19,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/forecast/forecast.component').then(m => m.ForecastComponent),
     title: 'Nimbus — Forecast',
+    canActivate: [locationGuard],
   },
   {
     path: 'details',
     loadComponent: () =>
       import('./features/details/details.component').then(m => m.DetailsComponent),
     title: 'Nimbus — Details',
+    canActivate: [locationGuard],
   },
   {
     path: 'locations',

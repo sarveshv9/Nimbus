@@ -4,6 +4,7 @@ import { Observable, map, catchError, of } from 'rxjs';
 import { GeoLocation } from '../models/location.model';
 
 const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
+const REVERSE_GEOCODING_API = 'https://api.bigdatacloud.net/data/reverse-geocode-client';
 
 interface OpenMeteoGeocodingResponse {
   results?: Array<{
@@ -44,6 +45,32 @@ export class GeocodingService {
     return this.http.get<OpenMeteoGeocodingResponse>(GEOCODING_API, { params }).pipe(
       map(response => this.mapResults(response)),
       catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Reverse geocodes coordinates to a human-readable city name using BigDataCloud free tier.
+   */
+  reverseGeocode(lat: number, lon: number): Observable<Partial<GeoLocation>> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lon.toString())
+      .set('localityLanguage', 'en');
+
+    return this.http.get<any>(REVERSE_GEOCODING_API, { params }).pipe(
+      map(res => ({
+        name: res.city || res.locality || res.principalSubdivision || 'Current Location',
+        admin1: res.principalSubdivision,
+        country: res.countryName,
+        countryCode: res.countryCode,
+        latitude: lat,
+        longitude: lon,
+      })),
+      catchError(() => of({
+        name: 'Current Location',
+        latitude: lat,
+        longitude: lon,
+      }))
     );
   }
 

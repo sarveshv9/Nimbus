@@ -45,7 +45,7 @@
   <div class="error-state">
     <div class="hero-theme-card">
       <i class="ph ph-warning-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
-      <p class="error-message">{{ weather.error() || 'Failed to load weather data' }}</p>
+      <p class="error-message">{{ weather.error()?.message || 'Failed to load weather data' }}</p>
       <button class="retry-btn" (click)="weather.loadWeather(weather.selectedLocation()!)">Try Again</button>
     </div>
   </div>
@@ -62,14 +62,23 @@
             <i class="ph-fill ph-map-pin" style="font-size: 20px;"></i>
             <span>{{ locationName }}</span>
           </div>
-          <div class="location-updating">
-            <span class="dot"></span> Updating
-          </div>
+          @if (weather.isLoading()) {
+            <div class="location-updating">
+              <span class="dot"></span> Updating
+            </div>
+          }
         </div>
         <button class="nav-btn" routerLink="/settings" aria-label="Settings">
           <i class="ph ph-gear" style="font-size: 28px;"></i>
         </button>
       </header>
+
+      @if (weather.syncError()) {
+        <div class="sync-error-toast">
+          <i class="ph-fill ph-warning-circle"></i>
+          <span>{{ weather.syncError() }}</span>
+        </div>
+      }
 
       <!-- Hero Weather — Editorial Typography -->
       <div class="hero-weather" routerLink="/details" role="button" tabindex="0" aria-label="View detailed weather information">

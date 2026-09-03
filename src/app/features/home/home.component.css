@@ -5,6 +5,23 @@
   animation: fadeIn var(--duration-normal) var(--ease-decel);
 }
 
+/* === SYNC ERROR TOAST === */
+.sync-error-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #FFFFFF;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 var(--space-6) var(--space-4) var(--space-6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* === TOP BLUE CARD — Now with gradient matching the Dribbble design === */
 .hero-theme-card {
   flex: 1;

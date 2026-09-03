@@ -53,11 +53,11 @@ export class App implements OnInit {
     // Try browser geolocation
     this.locationService.getCurrentPosition().subscribe({
       next: (pos) => {
-        this.weatherStore.loadWeatherByCoords(pos.latitude, pos.longitude, 'Current Location');
+        this.weatherStore.loadWeatherByCoords(pos.latitude, pos.longitude);
       },
       error: () => {
         // Default to Mumbai, India
-        this.weatherStore.loadWeatherByCoords(19.0760, 72.8777, 'Mumbai');
+        this.weatherStore.loadWeatherByCoords(19.0760, 72.8777);
       },
     });
   }

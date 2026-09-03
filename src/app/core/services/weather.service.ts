@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, map, catchError, throwError, forkJoin } from 'rxjs';
 import {
   CurrentWeather,
@@ -241,16 +241,18 @@ export class WeatherService {
   }
 
   private mapError(err: unknown): WeatherError {
-    if (err instanceof Error && err.message.includes('Http failure response')) {
-      return { type: 'network', message: 'Unable to connect to weather service. Check your internet connection.' };
+    if (err instanceof HttpErrorResponse) {
+      if (err.status === 0 || !navigator.onLine) {
+        return { type: 'network', message: 'Unable to connect to weather service. Check your internet connection.' };
+      }
+      if (err.status === 429) {
+        return { type: 'rate-limit', message: 'Too many requests. Please try again in a moment.' };
+      }
+      if (err.status >= 400 && err.status < 500) {
+        return { type: 'location-invalid', message: 'Invalid location or parameters.' };
+      }
     }
-    const httpErr = err as { status?: number };
-    if (httpErr.status === 429) {
-      return { type: 'rate-limit', message: 'Too many requests. Please try again in a moment.' };
-    }
-    if (httpErr.status === 400) {
-      return { type: 'location-invalid', message: 'Invalid location coordinates.' };
-    }
+
     return { type: 'unknown', message: 'Something went wrong. Please try again.' };
   }
 }
