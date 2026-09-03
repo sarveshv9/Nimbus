@@ -4,22 +4,44 @@
 
 export type TemperatureUnit = 'celsius' | 'fahrenheit';
 export type WindSpeedUnit = 'kmh' | 'mph' | 'ms' | 'knots';
+export type PressureUnit = 'hpa' | 'inhg';
+export type DistanceUnit = 'km' | 'mi';
+export type TimeFormat = '12h' | '24h';
+export type DefaultLocation = 'last_used' | 'always_ask' | 'gps' | number;
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface UserSettings {
   readonly temperatureUnit: TemperatureUnit;
   readonly windSpeedUnit: WindSpeedUnit;
+  readonly pressureUnit: PressureUnit;
+  readonly distanceUnit: DistanceUnit;
+  readonly timeFormat: TimeFormat;
+  readonly defaultLocationOnLaunch: DefaultLocation;
   readonly themeMode: ThemeMode;
   readonly reducedMotion: boolean;
   readonly swearyLabels: boolean;
+  readonly notifications: {
+    readonly severeWeather: boolean;
+    readonly dailySummary: boolean;
+    readonly rainAlerts: boolean;
+  };
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
   temperatureUnit: 'celsius',
   windSpeedUnit: 'kmh',
+  pressureUnit: 'hpa',
+  distanceUnit: 'km',
+  timeFormat: '12h',
+  defaultLocationOnLaunch: 'last_used',
   themeMode: 'system',
   reducedMotion: false,
   swearyLabels: true,
+  notifications: {
+    severeWeather: false,
+    dailySummary: false,
+    rainAlerts: false
+  }
 };
 
 // === UNIT CONVERSION ===

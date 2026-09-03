@@ -1,8 +1,8 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SettingsStore } from '../../core/state/settings.store';
 import { WeatherStore } from '../../core/state/weather.store';
-import { WindSpeedUnit } from '../../core/models/settings.model';
+import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation, UserSettings } from '../../core/models/settings.model';
 
 @Component({
   selector: 'nimbus-settings',
@@ -26,8 +26,15 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       </div>
 
       <div class="page-content">
+        @if (showToast()) {
+          <div class="toast-notification">
+            <i class="ph-fill ph-check-circle" style="color: var(--success); font-size: 20px;"></i>
+            <span>Setting saved</span>
+          </div>
+        }
+
         <!-- Units -->
-        <section>
+        <section id="units">
           <h2 class="section-label">Units</h2>
           <div class="settings-card">
             <div class="setting-group">
@@ -35,23 +42,11 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-name">Temperature</span>
-                  <span class="setting-desc">Choose your preferred temperature unit</span>
+                  <span class="setting-desc">Preferred temperature unit</span>
                 </div>
                 <div class="toggle-group" role="radiogroup" aria-label="Temperature unit">
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.temperatureUnit() === 'celsius'"
-                    (click)="settings.setTemperatureUnit('celsius')"
-                    role="radio"
-                    [attr.aria-checked]="settings.temperatureUnit() === 'celsius'"
-                  >°C</button>
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.temperatureUnit() === 'fahrenheit'"
-                    (click)="settings.setTemperatureUnit('fahrenheit')"
-                    role="radio"
-                    [attr.aria-checked]="settings.temperatureUnit() === 'fahrenheit'"
-                  >°F</button>
+                  <button class="toggle-btn" [class.active]="settings.temperatureUnit() === 'celsius'" (click)="updateTemp('celsius')" role="radio" [attr.aria-checked]="settings.temperatureUnit() === 'celsius'">°C</button>
+                  <button class="toggle-btn" [class.active]="settings.temperatureUnit() === 'fahrenheit'" (click)="updateTemp('fahrenheit')" role="radio" [attr.aria-checked]="settings.temperatureUnit() === 'fahrenheit'">°F</button>
                 </div>
               </div>
 
@@ -59,80 +54,99 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-name">Wind Speed</span>
-                  <span class="setting-desc">Choose your preferred wind speed unit</span>
+                  <span class="setting-desc">Preferred wind speed unit</span>
                 </div>
                 <div class="toggle-group" role="radiogroup" aria-label="Wind speed unit">
                   @for (unit of windUnits; track unit.value) {
-                    <button
-                      class="toggle-btn"
-                      [class.active]="settings.windSpeedUnit() === unit.value"
-                      (click)="settings.setWindSpeedUnit(unit.value)"
-                      role="radio"
-                      [attr.aria-checked]="settings.windSpeedUnit() === unit.value"
-                    >{{ unit.label }}</button>
+                    <button class="toggle-btn" [class.active]="settings.windSpeedUnit() === unit.value" (click)="updateWind(unit.value)" role="radio" [attr.aria-checked]="settings.windSpeedUnit() === unit.value">{{ unit.label }}</button>
                   }
                 </div>
               </div>
+
+              <!-- Pressure -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Pressure</span>
+                  <span class="setting-desc">Preferred air pressure unit</span>
+                </div>
+                <div class="toggle-group" role="radiogroup" aria-label="Pressure unit">
+                  <button class="toggle-btn" [class.active]="settings.pressureUnit() === 'hpa'" (click)="updatePressure('hpa')" role="radio" [attr.aria-checked]="settings.pressureUnit() === 'hpa'">hPa</button>
+                  <button class="toggle-btn" [class.active]="settings.pressureUnit() === 'inhg'" (click)="updatePressure('inhg')" role="radio" [attr.aria-checked]="settings.pressureUnit() === 'inhg'">inHg</button>
+                </div>
+              </div>
+
+              <!-- Distance -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Distance</span>
+                  <span class="setting-desc">Visibility and distance unit</span>
+                </div>
+                <div class="toggle-group" role="radiogroup" aria-label="Distance unit">
+                  <button class="toggle-btn" [class.active]="settings.distanceUnit() === 'km'" (click)="updateDistance('km')" role="radio" [attr.aria-checked]="settings.distanceUnit() === 'km'">km</button>
+                  <button class="toggle-btn" [class.active]="settings.distanceUnit() === 'mi'" (click)="updateDistance('mi')" role="radio" [attr.aria-checked]="settings.distanceUnit() === 'mi'">miles</button>
+                </div>
+              </div>
+
+              <!-- Time Format -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Time Format</span>
+                  <span class="setting-desc">12-hour or 24-hour clock</span>
+                </div>
+                <div class="toggle-group" role="radiogroup" aria-label="Time format">
+                  <button class="toggle-btn" [class.active]="settings.timeFormat() === '12h'" (click)="updateTimeFormat('12h')" role="radio" [attr.aria-checked]="settings.timeFormat() === '12h'">12h</button>
+                  <button class="toggle-btn" [class.active]="settings.timeFormat() === '24h'" (click)="updateTimeFormat('24h')" role="radio" [attr.aria-checked]="settings.timeFormat() === '24h'">24h</button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- Theme -->
-        <section>
+        <!-- Appearance -->
+        <section id="appearance">
           <h2 class="section-label">Appearance</h2>
           <div class="settings-card">
             <div class="setting-group">
+              <!-- Theme -->
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-name">Theme</span>
-                  <span class="setting-desc">Choose between light, dark, or system default</span>
+                  <span class="setting-desc">Choose app color scheme</span>
                 </div>
-                <div class="toggle-group" role="radiogroup" aria-label="Theme mode">
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.themeMode() === 'light'"
-                    (click)="settings.setThemeMode('light')"
-                    role="radio"
-                    [attr.aria-checked]="settings.themeMode() === 'light'"
-                  >Light</button>
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.themeMode() === 'dark'"
-                    (click)="settings.setThemeMode('dark')"
-                    role="radio"
-                    [attr.aria-checked]="settings.themeMode() === 'dark'"
-                  >Dark</button>
-                  <button
-                    class="toggle-btn"
-                    [class.active]="settings.themeMode() === 'system'"
-                    (click)="settings.setThemeMode('system')"
-                    role="radio"
-                    [attr.aria-checked]="settings.themeMode() === 'system'"
-                  >Auto</button>
+                <div class="theme-swatch-group" role="radiogroup" aria-label="Theme mode">
+                  <button class="theme-swatch" [class.active]="settings.themeMode() === 'light'" (click)="updateTheme('light')" role="radio" aria-label="Light theme">
+                    <div class="swatch-preview light-swatch"></div>
+                    <span>Light</span>
+                  </button>
+                  <button class="theme-swatch" [class.active]="settings.themeMode() === 'dark'" (click)="updateTheme('dark')" role="radio" aria-label="Dark theme">
+                    <div class="swatch-preview dark-swatch"></div>
+                    <span>Dark</span>
+                  </button>
+                  <button class="theme-swatch" [class.active]="settings.themeMode() === 'system'" (click)="updateTheme('system')" role="radio" aria-label="System theme">
+                    <div class="swatch-preview system-swatch"></div>
+                    <span>Auto</span>
+                  </button>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        <!-- Personality -->
-        <section>
-          <h2 class="section-label">Personality</h2>
-          <div class="settings-card">
-            <div class="setting-group">
+              <!-- Sweary Labels -->
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-name">Sweary Labels</span>
-                  <span class="setting-desc">Show bold, sweary weather descriptions on the home screen</span>
+                  <span class="setting-desc">Show bold weather descriptions <span class="sweary-preview" [class.active]="settings.swearyLabels()">(e.g., "It's f*cking cold")</span></span>
                 </div>
-                <button
-                  class="switch"
-                  [class.active]="settings.swearyLabels()"
-                  (click)="settings.setSwearyLabels(!settings.swearyLabels())"
-                  role="switch"
-                  [attr.aria-checked]="settings.swearyLabels()"
-                  aria-label="Toggle sweary labels"
-                >
+                <button class="switch" [class.active]="settings.swearyLabels()" (click)="toggleSweary()" role="switch" [attr.aria-checked]="settings.swearyLabels()" aria-label="Toggle sweary labels">
+                  <span class="switch-thumb"></span>
+                </button>
+              </div>
+
+              <!-- Reduced Motion -->
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Reduced Motion</span>
+                  <span class="setting-desc">Disable UI transitions and background weather animations</span>
+                </div>
+                <button class="switch" [class.active]="settings.reducedMotion()" (click)="toggleMotion()" role="switch" [attr.aria-checked]="settings.reducedMotion()" aria-label="Toggle reduced motion">
                   <span class="switch-thumb"></span>
                 </button>
               </div>
@@ -140,111 +154,115 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
           </div>
         </section>
 
-        <!-- Accessibility -->
-        <section>
-          <h2 class="section-label">Accessibility</h2>
+        <!-- Notifications -->
+        <section id="notifications">
+          <h2 class="section-label">Notifications</h2>
           <div class="settings-card">
             <div class="setting-group">
               <div class="setting-row">
                 <div class="setting-info">
-                  <span class="setting-name">Reduced Motion</span>
-                  <span class="setting-desc">Minimize animations and weather effects</span>
+                  <span class="setting-name">Severe Weather Alerts</span>
+                  <span class="setting-desc">Get notified for dangerous conditions</span>
                 </div>
-                <button
-                  class="switch"
-                  [class.active]="settings.reducedMotion()"
-                  (click)="settings.setReducedMotion(!settings.reducedMotion())"
-                  role="switch"
-                  [attr.aria-checked]="settings.reducedMotion()"
-                  aria-label="Toggle reduced motion"
-                >
+                <button class="switch" [class.active]="settings.notifications().severeWeather" (click)="toggleNotification('severeWeather')" role="switch" [attr.aria-checked]="settings.notifications().severeWeather">
                   <span class="switch-thumb"></span>
                 </button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Daily Summary</span>
+                  <span class="setting-desc">Morning forecast notifications</span>
+                </div>
+                <button class="switch" [class.active]="settings.notifications().dailySummary" (click)="toggleNotification('dailySummary')" role="switch" [attr.aria-checked]="settings.notifications().dailySummary">
+                  <span class="switch-thumb"></span>
+                </button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Rain Alerts</span>
+                  <span class="setting-desc">Notify when rain is starting soon</span>
+                </div>
+                <button class="switch" [class.active]="settings.notifications().rainAlerts" (click)="toggleNotification('rainAlerts')" role="switch" [attr.aria-checked]="settings.notifications().rainAlerts">
+                  <span class="switch-thumb"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data & Privacy -->
+        <section id="data">
+          <h2 class="section-label">Data & Privacy</h2>
+          <div class="settings-card">
+            <div class="setting-group">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">Default Location on Launch</span>
+                  <span class="setting-desc">What to show when opening the app</span>
+                </div>
+                <select class="settings-select" [value]="settings.defaultLocationOnLaunch()" (change)="updateDefaultLocation($event)">
+                  <option value="last_used">Last viewed location</option>
+                  <option value="gps">Current GPS Location</option>
+                  <option value="always_ask">Always ask</option>
+                </select>
+              </div>
+
+              @if (geoDenied()) {
+                <div class="setting-row bg-warning">
+                  <div class="setting-info">
+                    <span class="setting-name text-warning">Location Permission Denied</span>
+                    <span class="setting-desc">To use GPS, please re-enable location access in your browser settings.</span>
+                  </div>
+                </div>
+              }
+
+              <a routerLink="/locations" class="setting-row clickable-row">
+                <div class="setting-info">
+                  <span class="setting-name">Manage Saved Locations</span>
+                  <span class="setting-desc">Reorder, delete, or search locations</span>
+                </div>
+                <i class="ph ph-caret-right" style="font-size: 20px; opacity: 0.5;"></i>
+              </a>
+
+              <div class="setting-row clickable-row" (click)="resetApp()">
+                <div class="setting-info">
+                  <span class="setting-name text-danger">Clear Cache / Reset App</span>
+                  <span class="setting-desc">Erase all saved locations and settings</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- About -->
-        <section>
+        <section id="about">
           <h2 class="section-label">About</h2>
           <div class="settings-card">
-            <div class="about-section">
-              <div class="about-header">
-                <div class="about-logo">
-                  <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-                    <defs>
-                      <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#4DB8FF" />
-                        <stop offset="100%" stop-color="#2D7FF9" />
-                      </linearGradient>
-                    </defs>
-                    <circle cx="32" cy="32" r="28" fill="url(#logo-grad)" opacity="0.2"/>
-                    <path d="M18 38 C18 38 16 28 26 26 C30 20 42 20 44 26 C50 26 52 32 50 36 C52 38 50 42 46 42 L20 42 C16 42 14 40 18 38 Z"
-                          fill="url(#logo-grad)" opacity="0.9"/>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="about-title">Nimbus</h3>
-                  <p class="about-version">v1.0.0 · Angular Frontend Showcase</p>
+            <div class="setting-group">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-name">App Version</span>
+                  <span class="setting-desc">Nimbus v1.1.0</span>
                 </div>
               </div>
-              <p class="about-desc">
-                A production-quality weather visualization platform demonstrating modern Angular architecture, signal-based state management, and premium UI engineering.
-              </p>
-
-              <div class="tech-grid">
-                <div class="tech-item">
-                  <span class="tech-label">Framework</span>
-                  <span class="tech-value">Angular 22</span>
+              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
+                <div class="setting-info">
+                  <span class="setting-name">Privacy Policy</span>
                 </div>
-                <div class="tech-item">
-                  <span class="tech-label">State</span>
-                  <span class="tech-value">Signals + RxJS</span>
+                <i class="ph ph-arrow-up-right" style="font-size: 16px; opacity: 0.5;"></i>
+              </a>
+              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
+                <div class="setting-info">
+                  <span class="setting-name">Terms of Service</span>
                 </div>
-                <div class="tech-item">
-                  <span class="tech-label">Rendering</span>
-                  <span class="tech-value">Zoneless CSR</span>
+                <i class="ph ph-arrow-up-right" style="font-size: 16px; opacity: 0.5;"></i>
+              </a>
+              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
+                <div class="setting-info">
+                  <span class="setting-name">Send Feedback</span>
                 </div>
-                <div class="tech-item">
-                  <span class="tech-label">API</span>
-                  <span class="tech-value">Open-Meteo</span>
-                </div>
-                <div class="tech-item">
-                  <span class="tech-label">Charts</span>
-                  <span class="tech-value">Custom SVG</span>
-                </div>
-                <div class="tech-item">
-                  <span class="tech-label">Testing</span>
-                  <span class="tech-value">Vitest</span>
-                </div>
-                <div class="tech-item">
-                  <span class="tech-label">Accessibility</span>
-                  <span class="tech-value">WCAG 2.2 AA</span>
-                </div>
-                <div class="tech-item">
-                  <span class="tech-label">PWA</span>
-                  <span class="tech-value">Service Worker</span>
-                </div>
-              </div>
-
-              <div class="architecture-list">
-                <h4>Angular Concepts Demonstrated</h4>
-                <ul>
-                  <li>Standalone components with signal inputs</li>
-                  <li>Signal-based reactive state management</li>
-                  <li>Computed signals for derived state</li>
-                  <li>Effects for side effects (localStorage, DOM)</li>
-                  <li>RxJS for async streams (search, HTTP)</li>
-                  <li>Lazy-loaded routes (loadComponent)</li>
-                  <li>Deferred views (&#64;defer on viewport)</li>
-                  <li>Modern control flow (&#64;if, &#64;for, &#64;switch)</li>
-                  <li>Zoneless change detection</li>
-                  <li>CSS custom properties theming</li>
-                  <li>Accessible combobox (WAI-ARIA)</li>
-                  <li>Progressive Web App (PWA)</li>
-                </ul>
-              </div>
+                <i class="ph ph-envelope-simple" style="font-size: 20px; opacity: 0.5;"></i>
+              </a>
             </div>
           </div>
         </section>
@@ -256,250 +274,333 @@ import { WindSpeedUnit } from '../../core/models/settings.model';
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-primary);
+      background: var(--bg-surface);
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
+      position: relative;
     }
 
     .top-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--space-2);
+      padding: 0 var(--space-4);
+      margin-bottom: var(--space-4);
     }
 
     .nav-btn {
-      color: #1A1A1A;
+      color: inherit;
       opacity: 0.7;
       padding: var(--space-2);
-      cursor: pointer;
+      border-radius: var(--radius-full);
+      transition: background var(--duration-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .location-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .page-title {
       font-size: var(--text-xl);
-      font-weight: 900;
-      color: #1A1A1A;
+      font-weight: var(--weight-bold);
+      color: inherit;
+      letter-spacing: -0.5px;
     }
 
     .page-content {
-      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
+      flex: 1;
+      padding: var(--space-4) var(--space-4) var(--space-12) var(--space-4);
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
+      gap: var(--space-8);
+      position: relative;
+      background: var(--bg-surface);
+      border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
+      margin-top: -20px;
     }
 
     section {
       display: flex;
       flex-direction: column;
+      gap: var(--space-3);
     }
 
     .section-label {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--accent);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--space-3);
+      letter-spacing: 1px;
+      padding-left: var(--space-2);
     }
 
     .settings-card {
-      background: transparent;
-      padding: 0;
+      background: var(--bg-card);
+      border: var(--card-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
     }
 
     .setting-group {
       display: flex;
       flex-direction: column;
     }
+
     .setting-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--space-4);
-      padding: var(--space-5) 0;
+      padding: var(--space-4);
       border-bottom: 1px solid var(--border-default);
+      transition: background var(--duration-fast);
     }
-    .setting-row:first-child {
-      padding-top: 0;
-    }
+
     .setting-row:last-child {
       border-bottom: none;
     }
-    .setting-info { flex: 1; }
-    .setting-name {
-      display: block;
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.5px;
+
+    .clickable-row {
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
+    .clickable-row:hover, .clickable-row:focus-visible {
+      background: rgba(128, 128, 128, 0.05);
+      outline: none;
+    }
+    
+    .bg-warning {
+      background: rgba(255, 160, 10, 0.1);
+      border-left: 4px solid var(--warning);
+    }
+
+    .setting-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      padding-right: var(--space-4);
+    }
+
+    .setting-name {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
+
     .setting-desc {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: var(--text-sm);
       color: var(--text-secondary);
-      margin-top: 6px;
       line-height: 1.4;
     }
 
-    .toggle-group {
-      display: flex;
-      background: var(--border-subtle);
-      border-radius: var(--radius-full);
-      padding: 4px;
+    .sweary-preview {
+      display: none;
+      font-style: italic;
+      color: var(--accent);
     }
-    .toggle-btn {
-      padding: var(--space-2) var(--space-4);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      background: transparent;
-      border: none;
-      border-radius: var(--radius-full);
-      cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-default);
-    }
-    .toggle-btn:hover { color: var(--text-primary); }
-    .toggle-btn.active {
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .sweary-preview.active {
+      display: inline;
     }
 
-    /* Switch */
-    .switch {
-      position: relative;
-      width: 56px;
-      height: 32px;
+    /* Toggles */
+    .toggle-group {
+      display: flex;
       background: var(--border-default);
-      border-radius: var(--radius-full);
-      border: none;
-      cursor: pointer;
-      transition: background var(--duration-fast) var(--ease-default);
-      flex-shrink: 0;
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      gap: 4px;
     }
+
+    .toggle-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      font-family: inherit;
+    }
+
+    .toggle-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .toggle-btn.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Switches */
+    .switch {
+      appearance: none;
+      border: none;
+      width: 44px;
+      height: 24px;
+      background: var(--border-default);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      padding: 0;
+    }
+
+    .switch:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .switch.active {
       background: var(--accent);
     }
+
     .switch-thumb {
       position: absolute;
-      top: 4px;
-      left: 4px;
-      width: 24px;
-      height: 24px;
-      background: white;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: #FFFFFF;
       border-radius: 50%;
-      transition: transform var(--duration-fast) var(--ease-bounce);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    .switch.active .switch-thumb {
-      transform: translateX(24px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* About */
-    .about-section {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-6);
-      padding-top: var(--space-4);
+    .switch.active .switch-thumb {
+      transform: translateX(20px);
     }
-    .about-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-    }
-    .about-logo {
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--border-subtle);
-      border-radius: 20px;
-    }
-    .about-title {
-      font-size: 32px;
-      font-weight: 900;
+    
+    /* Native Select styling */
+    .settings-select {
+      appearance: none;
+      background: var(--border-default);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 8px 32px 8px 12px;
+      font-size: var(--text-sm);
       color: var(--text-primary);
-      margin: 0;
-      letter-spacing: -1px;
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
     }
-    .about-version {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-top: 4px;
+    .settings-select:focus-visible {
+      outline: 2px solid var(--accent);
     }
-    .about-desc {
-      font-size: 16px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin: 0;
-      font-weight: 500;
+
+    /* Theme Swatches */
+    .theme-swatch-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
     }
-    .tech-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-4) var(--space-6);
-      padding: var(--space-5) 0;
-      border-top: 1px solid var(--border-default);
-      border-bottom: 1px solid var(--border-default);
+    
+    .setting-row:has(.theme-swatch-group) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .theme-swatch {
       background: transparent;
-    }
-    .tech-item {
+      border: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-    .tech-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .tech-value {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.5px;
-    }
-    .architecture-list {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: var(--space-4);
-    }
-    .architecture-list h4 {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-bold);
-      color: var(--text-primary);
-      margin-bottom: var(--space-3);
-    }
-    .architecture-list ul {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .architecture-list li {
-      font-size: var(--text-sm);
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
       color: var(--text-secondary);
-      padding-left: var(--space-4);
-      position: relative;
-    }
-    .architecture-list li::before {
-      content: '▸';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
       font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
     }
-  `],
+    
+    .theme-swatch:focus-visible .swatch-preview {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+    
+    .theme-swatch.active {
+      color: var(--text-primary);
+    }
+    
+    .theme-swatch.active .swatch-preview {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    
+    .swatch-preview {
+      width: 60px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-default);
+      transition: all var(--duration-fast);
+    }
+    
+    .light-swatch {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .dark-swatch {
+      background: linear-gradient(135deg, #212529 0%, #000000 100%);
+    }
+    .system-swatch {
+      background: linear-gradient(135deg, #f8f9fa 50%, #212529 50%);
+    }
+
+    .text-danger {
+      color: var(--danger);
+    }
+    .text-warning {
+      color: var(--warning);
+    }
+
+    /* Toast */
+    .toast-notification {
+      position: fixed;
+      bottom: var(--space-8);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: var(--card-border);
+      padding: 12px 20px;
+      border-radius: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: var(--weight-medium);
+      font-size: var(--text-sm);
+      z-index: 1000;
+      animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+  `]
 })
 export class SettingsComponent {
   readonly settings = inject(SettingsStore);
   readonly weather = inject(WeatherStore);
+  
+  readonly showToast = signal(false);
 
   readonly windUnits: { value: WindSpeedUnit; label: string }[] = [
     { value: 'kmh', label: 'km/h' },
@@ -507,4 +608,74 @@ export class SettingsComponent {
     { value: 'ms', label: 'm/s' },
     { value: 'knots', label: 'kn' },
   ];
+
+  geoDenied(): boolean {
+    return false; // Stub
+  }
+  
+  private triggerFeedback() {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+    this.showToast.set(true);
+    setTimeout(() => this.showToast.set(false), 2000);
+  }
+
+  updateTemp(unit: 'celsius' | 'fahrenheit') {
+    this.settings.setTemperatureUnit(unit);
+    this.triggerFeedback();
+  }
+  
+  updateWind(unit: WindSpeedUnit) {
+    this.settings.setWindSpeedUnit(unit);
+    this.triggerFeedback();
+  }
+  
+  updatePressure(unit: PressureUnit) {
+    this.settings.setPressureUnit(unit);
+    this.triggerFeedback();
+  }
+  
+  updateDistance(unit: DistanceUnit) {
+    this.settings.setDistanceUnit(unit);
+    this.triggerFeedback();
+  }
+  
+  updateTimeFormat(format: TimeFormat) {
+    this.settings.setTimeFormat(format);
+    this.triggerFeedback();
+  }
+  
+  updateTheme(theme: 'light' | 'dark' | 'system') {
+    this.settings.setThemeMode(theme);
+    this.triggerFeedback();
+  }
+  
+  toggleSweary() {
+    this.settings.setSwearyLabels(!this.settings.swearyLabels());
+    this.triggerFeedback();
+  }
+  
+  toggleMotion() {
+    this.settings.setReducedMotion(!this.settings.reducedMotion());
+    this.triggerFeedback();
+  }
+  
+  toggleNotification(key: keyof UserSettings['notifications']) {
+    const current = this.settings.notifications();
+    this.settings.updateNotifications({ [key]: !current[key] });
+    this.triggerFeedback();
+  }
+  
+  updateDefaultLocation(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.settings.setDefaultLocationOnLaunch(select.value as DefaultLocation);
+    this.triggerFeedback();
+  }
+
+  resetApp() {
+    if (confirm('Are you sure you want to erase all settings and saved locations? This cannot be undone.')) {
+      this.settings.resetApp();
+    }
+  }
 }

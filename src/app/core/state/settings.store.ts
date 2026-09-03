@@ -5,6 +5,10 @@ import {
   TemperatureUnit,
   WindSpeedUnit,
   ThemeMode,
+  PressureUnit,
+  DistanceUnit,
+  TimeFormat,
+  DefaultLocation,
 } from '../models/settings.model';
 import { StorageService } from '../services/storage.service';
 
@@ -21,6 +25,11 @@ export class SettingsStore {
   readonly themeMode = signal<ThemeMode>(DEFAULT_SETTINGS.themeMode);
   readonly reducedMotion = signal(DEFAULT_SETTINGS.reducedMotion);
   readonly swearyLabels = signal(DEFAULT_SETTINGS.swearyLabels);
+  readonly pressureUnit = signal<PressureUnit>(DEFAULT_SETTINGS.pressureUnit);
+  readonly distanceUnit = signal<DistanceUnit>(DEFAULT_SETTINGS.distanceUnit);
+  readonly timeFormat = signal<TimeFormat>(DEFAULT_SETTINGS.timeFormat);
+  readonly defaultLocationOnLaunch = signal<DefaultLocation>(DEFAULT_SETTINGS.defaultLocationOnLaunch);
+  readonly notifications = signal(DEFAULT_SETTINGS.notifications);
 
 
   // === DERIVED STATE ===
@@ -64,6 +73,11 @@ export class SettingsStore {
         themeMode: this.themeMode(),
         reducedMotion: this.reducedMotion(),
         swearyLabels: this.swearyLabels(),
+        pressureUnit: this.pressureUnit(),
+        distanceUnit: this.distanceUnit(),
+        timeFormat: this.timeFormat(),
+        defaultLocationOnLaunch: this.defaultLocationOnLaunch(),
+        notifications: this.notifications(),
       };
       this.storage.set(STORAGE_KEY, settings);
     });
@@ -110,6 +124,33 @@ export class SettingsStore {
     this.swearyLabels.set(enabled);
   }
 
+  setPressureUnit(unit: PressureUnit): void {
+    this.pressureUnit.set(unit);
+  }
+
+  setDistanceUnit(unit: DistanceUnit): void {
+    this.distanceUnit.set(unit);
+  }
+
+  setTimeFormat(format: TimeFormat): void {
+    this.timeFormat.set(format);
+  }
+
+  setDefaultLocationOnLaunch(location: DefaultLocation): void {
+    this.defaultLocationOnLaunch.set(location);
+  }
+
+  updateNotifications(updates: Partial<typeof DEFAULT_SETTINGS.notifications>): void {
+    this.notifications.update(current => ({ ...current, ...updates }));
+  }
+
+  resetApp(): void {
+    if (typeof window !== 'undefined') {
+      window.localStorage.clear();
+      window.location.href = '/';
+    }
+  }
+
   // === PRIVATE ===
 
   private hydrate(): void {
@@ -120,6 +161,11 @@ export class SettingsStore {
       this.themeMode.set(saved.themeMode ?? DEFAULT_SETTINGS.themeMode);
       this.reducedMotion.set(saved.reducedMotion ?? DEFAULT_SETTINGS.reducedMotion);
       this.swearyLabels.set(saved.swearyLabels ?? DEFAULT_SETTINGS.swearyLabels);
+      this.pressureUnit.set(saved.pressureUnit ?? DEFAULT_SETTINGS.pressureUnit);
+      this.distanceUnit.set(saved.distanceUnit ?? DEFAULT_SETTINGS.distanceUnit);
+      this.timeFormat.set(saved.timeFormat ?? DEFAULT_SETTINGS.timeFormat);
+      this.defaultLocationOnLaunch.set(saved.defaultLocationOnLaunch ?? DEFAULT_SETTINGS.defaultLocationOnLaunch);
+      this.notifications.set({ ...DEFAULT_SETTINGS.notifications, ...(saved.notifications || {}) });
     }
   }
 

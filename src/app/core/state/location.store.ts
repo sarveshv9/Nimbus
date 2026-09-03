@@ -54,6 +54,15 @@ export class LocationStore {
     );
   }
 
+  reorderLocations(previousIndex: number, currentIndex: number): void {
+    this.savedLocations.update(locations => {
+      const copy = [...locations];
+      const [movedItem] = copy.splice(previousIndex, 1);
+      copy.splice(currentIndex, 0, movedItem);
+      return copy.map((l, i) => ({ ...l, order: i }));
+    });
+  }
+
   isLocationSaved(locationId: number): boolean {
     return this.savedLocations().some(l => l.id === locationId);
   }
