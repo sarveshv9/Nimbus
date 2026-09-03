@@ -11,14 +11,21 @@
       </header>
 
       <div class="hero-weather">
-        <div class="hero-icon-container">
-          <nimbus-skeleton width="140px" height="140px" radius="full" />
+        <div class="hero-main-display" style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+          <div class="hero-icon-container" style="margin-bottom: 0;">
+            <nimbus-skeleton width="84px" height="84px" radius="full" />
+          </div>
+          <div class="hero-temp-container">
+            <nimbus-skeleton width="70px" height="56px" />
+          </div>
         </div>
-        <div class="hero-temp-container" style="margin-top: 16px;">
-          <nimbus-skeleton width="120px" height="80px" />
+        <nimbus-skeleton width="200px" height="40px" class="mb-1" />
+        
+        <div class="hero-divider"></div>
+        <div class="hero-bottom-bar" style="display: flex; justify-content: space-between; width: 100%;">
+          <nimbus-skeleton width="120px" height="20px" />
+          <nimbus-skeleton width="80px" height="20px" />
         </div>
-        <nimbus-skeleton width="160px" height="32px" class="mb-1" />
-        <nimbus-skeleton width="120px" height="20px" />
       </div>
 
       <div class="hero-stats" style="margin-top: auto;">
@@ -87,14 +94,16 @@
 
       <!-- Hero Weather — Editorial Typography -->
       <div class="hero-weather" routerLink="/details" role="button" tabindex="0" aria-label="View detailed weather information">
-        <div class="hero-icon-container">
-          <nimbus-weather-icon [weatherCode]="weather.currentWeather()?.weatherCode ?? 0" [size]="72" [isDay]="weather.currentWeather()?.isDay ?? true" />
-        </div>
+        <div class="hero-main-display" style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+          <div class="hero-icon-container" style="margin-bottom: 0; display: flex; align-items: center;">
+            <nimbus-weather-icon [weatherCode]="weather.currentWeather()?.weatherCode ?? 0" [size]="84" [isDay]="weather.currentWeather()?.isDay ?? true" />
+          </div>
 
-        <div class="hero-temp-container" style="margin-top: 8px; margin-bottom: 16px;">
-          <span style="font-size: 72px; font-weight: 900; font-family: 'Inter', sans-serif; letter-spacing: -3px; line-height: 1;">
-            {{ weather.currentWeather()?.temperature | temperature:'value' }}°
-          </span>
+          <div class="hero-temp-container" style="display: flex; align-items: center; margin-top: 4px;">
+            <span style="font-size: 56px; font-weight: 400; font-family: 'Inter', sans-serif; letter-spacing: -2px; line-height: 1;">
+              {{ weather.currentWeather()?.temperature | temperature:'value' }}°
+            </span>
+          </div>
         </div>
 
         @if (settings.swearyLabels()) {
@@ -104,23 +113,20 @@
               <span [class.hero-accent]="line.trim() === getSwearyLabel(weather.currentWeather()?.weatherCode).accent">{{ line }}</span>
             }
           </h1>
-          <p class="hero-subtitle">{{ getSwearyLabel(weather.currentWeather()?.weatherCode).subtitle }}</p>
         } @else {
-          <h1 class="hero-headline">
+          <h1 class="hero-headline" style="margin-bottom: 0;">
             <span>It's</span><br>
             <span>{{ getWeatherMeta(weather.currentWeather()?.weatherCode).label | lowercase }}.</span>
           </h1>
-          <p class="hero-subtitle">{{ currentDate }}</p>
         }
 
         <div class="hero-divider"></div>
 
-        <div class="hero-bottom-bar">
-          <div class="hero-bottom-info">
-            <span class="hero-bottom-label">{{ weather.nowcastLabel() || 'Be prepared\nfor the weather' }}</span>
-          </div>
-          <div class="hero-bottom-time">
-            <span class="hero-time-value">{{ currentTime }}</span>
+        <div class="hero-bottom-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-weight: 600; font-size: 15px; opacity: 0.9;">
+          <div>Feels like {{ weather.currentWeather()?.feelsLike | temperature:'value' }}°</div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <i class="ph-fill ph-sun" style="color: var(--warning);"></i> 
+            UV {{ uvIndexLabel(weather.currentWeather()?.uvIndex ?? 0) }}
           </div>
         </div>
       </div>

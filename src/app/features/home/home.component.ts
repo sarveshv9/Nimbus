@@ -53,19 +53,7 @@ export class HomeComponent {
     }).toUpperCase();
   }
 
-  get currentDate(): string {
-    const now = new Date();
-    return now.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    });
-  }
 
-  get currentTime(): string {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-  }
 
   formatHour(time: string): string {
     const date = new Date(time);
