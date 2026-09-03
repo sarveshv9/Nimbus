@@ -91,6 +91,12 @@
           <nimbus-weather-icon [weatherCode]="weather.currentWeather()?.weatherCode ?? 0" [size]="72" [isDay]="weather.currentWeather()?.isDay ?? true" />
         </div>
 
+        <div class="hero-temp-container" style="margin-top: 8px; margin-bottom: 16px;">
+          <span style="font-size: 72px; font-weight: 900; font-family: 'Inter', sans-serif; letter-spacing: -3px; line-height: 1;">
+            {{ weather.currentWeather()?.temperature | temperature:'value' }}°
+          </span>
+        </div>
+
         @if (settings.swearyLabels()) {
           <h1 class="hero-headline">
             @for (line of getSwearyLabel(weather.currentWeather()?.weatherCode).headline.split('\n'); track $index) {
@@ -102,7 +108,6 @@
         } @else {
           <h1 class="hero-headline">
             <span>It's</span><br>
-            <span class="hero-accent">{{ weather.currentWeather()?.temperature | temperature:'value' }}°</span><br>
             <span>{{ getWeatherMeta(weather.currentWeather()?.weatherCode).label | lowercase }}.</span>
           </h1>
           <p class="hero-subtitle">{{ currentDate }}</p>

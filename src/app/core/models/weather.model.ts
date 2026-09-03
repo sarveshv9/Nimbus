@@ -108,7 +108,7 @@ export interface SwearyLabel {
 export const SWEARY_LABELS: Record<WeatherCondition, SwearyLabel> = {
   'clear':          { headline: "It's fucking\nbeautiful.",  accent: 'beautiful.',  subtitle: 'You can look outside to get more information.' },
   'partly-cloudy':  { headline: "It's kinda\ncloudy.",       accent: 'cloudy.',     subtitle: 'The sun is playing hide and seek, basically.' },
-  'cloudy':         { headline: "It's fucking\novercast.",    accent: 'overcast.',   subtitle: 'The sky looks like a dirty dishrag.' },
+  'cloudy':         { headline: "It's one giant\nfucking cloud.", accent: 'cloud.',      subtitle: 'The sky looks like a dirty dishrag.' },
   'foggy':          { headline: "You can't\nsee shit.",      accent: 'see shit.',   subtitle: "It's foggy as hell out there." },
   'drizzle':        { headline: "It's fucking\ndrizzling.",   accent: 'drizzling.',  subtitle: "Not quite rain, not quite dry. Just annoying." },
   'rain':           { headline: "It's fucking\nraining.",     accent: 'raining.',    subtitle: 'You can look outside to get more information.' },
