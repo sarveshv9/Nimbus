@@ -243,9 +243,17 @@ ul, ol {
 
 
 
+@keyframes gradientBreathe {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
 /* === UTILITY CLASSES === */
 .hero-theme-card {
-  background: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
+  background-image: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
+  background-size: 100% 200%;
+  animation: gradientBreathe 15s ease infinite;
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
   padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
@@ -253,37 +261,37 @@ ul, ol {
   flex-direction: column;
   color: #1A1A1A;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background-image 0.5s ease, color 0.5s ease;
 }
 
 .hero-theme-card--clear {
-  background: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
+  background-image: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
   color: #1A1A1A;
 }
 
 .hero-theme-card--cloudy {
   /* Overcast - dark slate grey */
-  background: linear-gradient(180deg, hsl(210, 15%, 45%) 0%, hsl(220, 10%, 40%) 40%, hsl(210, 10%, 35%) 100%);
+  background-image: linear-gradient(180deg, hsl(210, 15%, 45%) 0%, hsl(220, 10%, 40%) 40%, hsl(210, 10%, 35%) 100%);
   color: #FFFFFF;
 }
 
 .hero-theme-card--rain {
-  background: linear-gradient(180deg, hsl(200, 30%, 55%) 0%, hsl(210, 25%, 50%) 50%, hsl(220, 20%, 45%) 100%);
+  background-image: linear-gradient(180deg, hsl(200, 30%, 55%) 0%, hsl(210, 25%, 50%) 50%, hsl(220, 20%, 45%) 100%);
   color: #FFFFFF;
 }
 
 .hero-theme-card--snow {
-  background: linear-gradient(180deg, hsl(190, 40%, 90%) 0%, hsl(200, 30%, 95%) 50%, hsl(210, 20%, 90%) 100%);
+  background-image: linear-gradient(180deg, hsl(190, 40%, 90%) 0%, hsl(200, 30%, 95%) 50%, hsl(210, 20%, 90%) 100%);
   color: #1A1A1A;
 }
 
 .hero-theme-card--storm {
-  background: linear-gradient(180deg, hsl(240, 30%, 35%) 0%, hsl(250, 25%, 30%) 50%, hsl(260, 20%, 25%) 100%);
+  background-image: linear-gradient(180deg, hsl(240, 30%, 35%) 0%, hsl(250, 25%, 30%) 50%, hsl(260, 20%, 25%) 100%);
   color: #FFFFFF;
 }
 
 .hero-theme-card--night {
-  background: linear-gradient(180deg, hsl(230, 40%, 25%) 0%, hsl(240, 50%, 20%) 50%, hsl(250, 40%, 15%) 100%);
+  background-image: linear-gradient(180deg, hsl(230, 40%, 25%) 0%, hsl(240, 50%, 20%) 50%, hsl(250, 40%, 15%) 100%);
   color: #FFFFFF;
 }
 
@@ -296,31 +304,43 @@ ul, ol {
 .bottom-theme-section--clear {
   background: hsl(200, 40%, 90%);
   color: #1A1A1A;
+  --theme-pill-bg: hsl(200, 60%, 75%);
+  --theme-pill-text: #1A1A1A;
 }
 
 .bottom-theme-section--cloudy {
   background: hsl(210, 15%, 25%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(210, 20%, 40%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .bottom-theme-section--rain {
   background: hsl(210, 20%, 30%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(210, 30%, 45%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .bottom-theme-section--snow {
   background: hsl(200, 30%, 95%);
   color: #1A1A1A;
+  --theme-pill-bg: hsl(200, 40%, 80%);
+  --theme-pill-text: #1A1A1A;
 }
 
 .bottom-theme-section--storm {
   background: hsl(250, 25%, 15%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(250, 30%, 30%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .bottom-theme-section--night {
   background: hsl(240, 50%, 10%);
   color: #FFFFFF;
+  --theme-pill-bg: hsl(240, 40%, 25%);
+  --theme-pill-text: #FFFFFF;
 }
 
 .hero-theme-card .nav-btn,

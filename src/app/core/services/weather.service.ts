@@ -8,6 +8,7 @@ import {
   AirQuality,
   WeatherData,
   WeatherError,
+  MinutelyForecast,
 } from '../models/weather.model';
 
 const FORECAST_API = 'https://api.open-meteo.com/v1/forecast';
@@ -62,13 +63,18 @@ const DAILY_PARAMS = [
   'wind_direction_10m_dominant',
 ].join(',');
 
-// Air quality variables
-const AQ_PARAMS = ['us_aqi', 'european_aqi', 'pm2_5', 'pm10'].join(',');
+// Air quality variables (including pollen)
+const AQ_PARAMS = [
+  'us_aqi', 'european_aqi', 'pm2_5', 'pm10',
+  'alder_pollen', 'birch_pollen', 'grass_pollen', 
+  'mugwort_pollen', 'olive_pollen', 'ragweed_pollen'
+].join(',');
 
 interface OpenMeteoForecastResponse {
   current: Record<string, number | string>;
   hourly: Record<string, (number | string | null)[]>;
   daily: Record<string, (number | string | null)[]>;
+  minutely_15?: Record<string, (number | string | null)[]>;
 }
 
 interface OpenMeteoAirQualityResponse {
@@ -94,6 +100,7 @@ export class WeatherService {
         current: forecast.current,
         hourly: forecast.hourly,
         daily: forecast.daily,
+        minutely15: forecast.minutely15,
         airQuality,
       })),
       catchError(err => throwError(() => this.mapError(err)))
@@ -104,6 +111,7 @@ export class WeatherService {
     current: CurrentWeather;
     hourly: HourlyForecast[];
     daily: DailyForecast[];
+    minutely15: MinutelyForecast[];
   }> {
     const params = new HttpParams()
       .set('latitude', lat.toString())
@@ -111,14 +119,17 @@ export class WeatherService {
       .set('current', CURRENT_PARAMS)
       .set('hourly', HOURLY_PARAMS)
       .set('daily', DAILY_PARAMS)
+      .set('minutely_15', 'precipitation')
       .set('timezone', 'auto')
-      .set('forecast_days', '7');
+      .set('forecast_days', '7')
+      .set('forecast_minutely_15', '24'); // get 24 hours of minutely data (wait, usually we just need next hour, maybe forecast_days is enough, but API supports forecast_hours, actually I'll just omit forecast_minutely_15 and let it default)
 
     return this.http.get<OpenMeteoForecastResponse>(FORECAST_API, { params }).pipe(
       map(response => ({
         current: this.mapCurrentWeather(response.current),
         hourly: this.mapHourlyForecast(response.hourly),
         daily: this.mapDailyForecast(response.daily),
+        minutely15: response.minutely_15 ? this.mapMinutelyForecast(response.minutely_15) : [],
       }))
     );
   }
@@ -206,12 +217,26 @@ export class WeatherService {
     }));
   }
 
+  private mapMinutelyForecast(data: Record<string, (number | string | null)[]>): MinutelyForecast[] {
+    const times = data['time'] as string[];
+    return times.map((time, i) => ({
+      time,
+      precipitation: (data['precipitation']?.[i] ?? 0) as number,
+    }));
+  }
+
   private mapAirQuality(data: Record<string, number | null>): AirQuality {
     return {
       usAqi: data['us_aqi'] ?? null,
       europeanAqi: data['european_aqi'] ?? null,
       pm25: data['pm2_5'] ?? null,
       pm10: data['pm10'] ?? null,
+      alderPollen: data['alder_pollen'] ?? null,
+      birchPollen: data['birch_pollen'] ?? null,
+      grassPollen: data['grass_pollen'] ?? null,
+      mugwortPollen: data['mugwort_pollen'] ?? null,
+      olivePollen: data['olive_pollen'] ?? null,
+      ragweedPollen: data['ragweed_pollen'] ?? null,
     };
   }
 

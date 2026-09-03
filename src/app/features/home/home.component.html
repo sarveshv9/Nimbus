@@ -98,7 +98,7 @@
 
         <div class="hero-bottom-bar">
           <div class="hero-bottom-info">
-            <span class="hero-bottom-label">Be prepared<br>for the weather</span>
+            <span class="hero-bottom-label">{{ weather.nowcastLabel() || 'Be prepared\nfor the weather' }}</span>
           </div>
           <div class="hero-bottom-time">
             <span class="hero-time-value">{{ currentTime }}</span>

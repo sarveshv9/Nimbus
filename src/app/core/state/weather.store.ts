@@ -3,6 +3,7 @@ import {
   CurrentWeather,
   HourlyForecast,
   DailyForecast,
+  MinutelyForecast,
   AirQuality,
   WeatherData,
   WeatherError,
@@ -26,6 +27,7 @@ export class WeatherStore {
   readonly currentWeather = signal<CurrentWeather | null>(null);
   readonly hourlyForecast = signal<HourlyForecast[]>([]);
   readonly dailyForecast = signal<DailyForecast[]>([]);
+  readonly minutelyForecast = signal<MinutelyForecast[]>([]);
   readonly airQuality = signal<AirQuality | null>(null);
   readonly selectedLocation = signal<GeoLocation | null>(null);
   readonly isLoading = signal(false);
@@ -83,6 +85,40 @@ export class WeatherStore {
     return hourly.slice(startIndex, startIndex + 24);
   });
 
+  readonly nowcastLabel = computed(() => {
+    const minutely = this.minutelyForecast();
+    if (!minutely || minutely.length === 0) return null;
+    
+    const now = new Date();
+    // Open-Meteo returns time in ISO format local to the requested timezone.
+    // So we should format current time similarly (YYYY-MM-DDTHH:mm)
+    const tzOffset = now.getTimezoneOffset() * 60000; // in milliseconds
+    const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
+    
+    const upcoming = minutely.filter(m => m.time >= localISOTime).slice(0, 8); // next 2 hours
+    if (upcoming.length === 0) return null;
+
+    const currentlyRaining = upcoming[0].precipitation > 0;
+    
+    if (currentlyRaining) {
+      const stopIndex = upcoming.findIndex(m => m.precipitation === 0);
+      if (stopIndex === -1) {
+        return 'Rain continuing for at least an hour';
+      } else {
+        const min = stopIndex * 15;
+        return `Rain stopping in about ${min} mins`;
+      }
+    } else {
+      const startIndex = upcoming.findIndex(m => m.precipitation > 0);
+      if (startIndex === -1) {
+        return 'No rain expected in the next hour';
+      } else {
+        const min = startIndex * 15;
+        return `Rain starting in about ${min} mins`;
+      }
+    }
+  });
+
   readonly hasData = computed(() => this.currentWeather() !== null);
 
   // === EFFECTS (side effects) ===
@@ -110,6 +146,16 @@ export class WeatherStore {
     this.isLoading.set(true);
     this.error.set(null);
 
+    const cacheKey = `nimbus-weather-${location.latitude.toFixed(4)}-${location.longitude.toFixed(4)}`;
+    const cached = this.storage.get<WeatherData>(cacheKey);
+    if (cached) {
+      this.currentWeather.set(cached.current);
+      this.hourlyForecast.set(cached.hourly);
+      this.dailyForecast.set(cached.daily);
+      if (cached.minutely15) this.minutelyForecast.set(cached.minutely15);
+      this.airQuality.set(cached.airQuality);
+    }
+
     this.weatherService
       .fetchWeatherData(location.latitude, location.longitude)
       .subscribe({
@@ -117,11 +163,15 @@ export class WeatherStore {
           this.currentWeather.set(data.current);
           this.hourlyForecast.set(data.hourly);
           this.dailyForecast.set(data.daily);
+          if (data.minutely15) this.minutelyForecast.set(data.minutely15);
           this.airQuality.set(data.airQuality);
+          this.storage.set(cacheKey, data);
           this.isLoading.set(false);
         },
         error: (err: WeatherError) => {
-          this.error.set(err);
+          if (!cached) {
+            this.error.set(err);
+          }
           this.isLoading.set(false);
         },
       });

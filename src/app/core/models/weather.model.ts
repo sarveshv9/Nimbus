@@ -66,9 +66,28 @@ export const WMO_CODE_MAP: Record<number, WeatherConditionMeta> = {
 export const UNKNOWN_CONDITION: WeatherConditionMeta = {
   condition: 'unknown',
   label: 'Unknown',
-  icon: 'cloud',
-  theme: 'cloudy',
+  icon: 'question',
+  theme: 'clear',
 };
+
+export function getMoonPhase(date: Date = new Date()): { phase: string; icon: string; cycle: number } {
+  // Approximate lunar cycle calculations based on a known new moon
+  const newMoon2000 = new Date('2000-01-06T18:14:00Z').getTime();
+  const lunarDays = 29.53058867;
+  const msPerDay = 1000 * 60 * 60 * 24;
+  
+  const diffDays = (date.getTime() - newMoon2000) / msPerDay;
+  const cycle = (diffDays % lunarDays) / lunarDays; // 0 to 1
+  
+  if (cycle < 0.03 || cycle > 0.97) return { phase: 'New Moon', icon: 'moon', cycle };
+  if (cycle < 0.22) return { phase: 'Waxing Crescent', icon: 'moon', cycle };
+  if (cycle < 0.28) return { phase: 'First Quarter', icon: 'moon', cycle };
+  if (cycle < 0.47) return { phase: 'Waxing Gibbous', icon: 'moon', cycle };
+  if (cycle < 0.53) return { phase: 'Full Moon', icon: 'moon-stars', cycle };
+  if (cycle < 0.72) return { phase: 'Waning Gibbous', icon: 'moon', cycle };
+  if (cycle < 0.78) return { phase: 'Last Quarter', icon: 'moon', cycle };
+  return { phase: 'Waning Crescent', icon: 'moon', cycle };
+}
 
 export function getWeatherMeta(code: number | null | undefined): WeatherConditionMeta {
   if (code == null) return UNKNOWN_CONDITION;
@@ -178,6 +197,12 @@ export interface AirQuality {
   readonly europeanAqi: number | null;
   readonly pm25: number | null;
   readonly pm10: number | null;
+  readonly alderPollen: number | null;
+  readonly birchPollen: number | null;
+  readonly grassPollen: number | null;
+  readonly mugwortPollen: number | null;
+  readonly olivePollen: number | null;
+  readonly ragweedPollen: number | null;
 }
 
 export type AqiCategory = 'good' | 'moderate' | 'unhealthy-sensitive' | 'unhealthy' | 'very-unhealthy' | 'hazardous';
@@ -204,10 +229,16 @@ export function getAqiCategory(aqi: number): AqiCategoryMeta {
 
 // === COMBINED WEATHER DATA ===
 
+export interface MinutelyForecast {
+  readonly time: string;
+  readonly precipitation: number;
+}
+
 export interface WeatherData {
   readonly current: CurrentWeather;
   readonly hourly: HourlyForecast[];
   readonly daily: DailyForecast[];
+  readonly minutely15: MinutelyForecast[];
   readonly airQuality: AirQuality | null;
 }
 

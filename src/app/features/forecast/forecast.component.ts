@@ -74,6 +74,9 @@ import { getWeatherMeta } from '../../core/models/weather.model';
               </div>
               <div class="forecast-temps">
                 <span class="forecast-high">{{ day.tempMax | temperature }}</span>
+                <div class="sparkline-container">
+                  <div class="sparkline-bar" [style]="getSparklineStyle(day.tempMin, day.tempMax)"></div>
+                </div>
                 <span class="forecast-low">{{ day.tempMin | temperature }}</span>
               </div>
             </div>
@@ -253,9 +256,25 @@ import { getWeatherMeta } from '../../core/models/weather.model';
     .forecast-temps {
       display: flex;
       align-items: center;
-      gap: var(--space-4);
-      width: 120px;
+      gap: var(--space-3);
+      width: 150px;
       justify-content: flex-end;
+    }
+
+    .sparkline-container {
+      width: 60px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sparkline-bar {
+      height: 100%;
+      position: absolute;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #32d74b, #ff9f0a);
     }
 
     .forecast-high {
@@ -286,6 +305,29 @@ export class ForecastComponent {
   readonly sevenDays = computed(() => {
     return this.weather.dailyForecast();
   });
+
+  readonly weekExtremes = computed(() => {
+    const daily = this.weather.dailyForecast();
+    if (daily.length === 0) return { min: 0, max: 0, range: 1 };
+    let min = daily[0].tempMin;
+    let max = daily[0].tempMax;
+    for (const d of daily) {
+      if (d.tempMin < min) min = d.tempMin;
+      if (d.tempMax > max) max = d.tempMax;
+    }
+    const range = max - min || 1;
+    return { min, max, range };
+  });
+
+  getSparklineStyle(dayMin: number, dayMax: number) {
+    const ex = this.weekExtremes();
+    const leftPercent = ((dayMin - ex.min) / ex.range) * 100;
+    const widthPercent = ((dayMax - dayMin) / ex.range) * 100;
+    return {
+      left: `${leftPercent}%`,
+      width: `${Math.max(widthPercent, 5)}%`,
+    };
+  }
 
   formatDayShort(dateStr: string): string {
     const date = new Date(dateStr + 'T00:00:00');
