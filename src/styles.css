@@ -245,24 +245,25 @@ ul, ol {
 
 /* === UTILITY CLASSES === */
 .hero-theme-card {
-  background: linear-gradient(180deg, hsl(200, 50%, 65%) 0%, hsl(220, 45%, 70%) 40%, hsl(210, 50%, 65%) 100%);
+  background: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
   padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
   display: flex;
   flex-direction: column;
-  color: #FFFFFF;
+  color: #1A1A1A;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
   transition: background 0.5s ease, color 0.5s ease;
 }
 
 .hero-theme-card--clear {
-  background: linear-gradient(180deg, hsl(200, 50%, 65%) 0%, hsl(220, 45%, 70%) 40%, hsl(210, 50%, 65%) 100%);
-  color: #FFFFFF;
+  background: linear-gradient(180deg, hsl(200, 40%, 82%) 0%, hsl(220, 30%, 85%) 30%, hsl(250, 35%, 82%) 70%, hsl(270, 30%, 80%) 100%);
+  color: #1A1A1A;
 }
 
 .hero-theme-card--cloudy {
-  background: linear-gradient(180deg, hsl(210, 20%, 65%) 0%, hsl(220, 15%, 70%) 40%, hsl(210, 15%, 60%) 100%);
+  /* Overcast - dark slate grey */
+  background: linear-gradient(180deg, hsl(210, 15%, 45%) 0%, hsl(220, 10%, 40%) 40%, hsl(210, 10%, 35%) 100%);
   color: #FFFFFF;
 }
 
@@ -272,8 +273,8 @@ ul, ol {
 }
 
 .hero-theme-card--snow {
-  background: linear-gradient(180deg, hsl(190, 30%, 75%) 0%, hsl(200, 25%, 80%) 50%, hsl(210, 20%, 75%) 100%);
-  color: #FFFFFF;
+  background: linear-gradient(180deg, hsl(190, 40%, 90%) 0%, hsl(200, 30%, 95%) 50%, hsl(210, 20%, 90%) 100%);
+  color: #1A1A1A;
 }
 
 .hero-theme-card--storm {
