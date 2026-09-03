@@ -11,12 +11,10 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
   styles: [`
     :host {
       display: block;
-      background: var(--glass-bg);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
-      border: 1px solid var(--glass-border-color);
+      background: var(--bg-surface);
+      border: var(--card-border);
       border-radius: var(--radius-xl);
-      box-shadow: var(--glass-shadow);
+      box-shadow: var(--shadow-sm);
       padding: var(--space-6);
       transition: background var(--duration-normal) var(--ease-default),
                   border-color var(--duration-normal) var(--ease-default),
@@ -35,9 +33,8 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
     :host(.interactive:hover) {
       background: var(--bg-surface-hover);
-      border-color: rgba(var(--accent-rgb), 0.2);
-      box-shadow: var(--shadow-lg), 0 0 24px rgba(var(--accent-rgb), 0.08);
-      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
     }
 
     :host(.interactive:active) {

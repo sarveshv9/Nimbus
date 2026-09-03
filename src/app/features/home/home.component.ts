@@ -1,20 +1,21 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { DecimalPipe, LowerCasePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
 import { LocationStore } from '../../core/state/location.store';
 import { formatLocationShort } from '../../core/models/location.model';
 import { convertTemperature, formatTemperature, windDirectionLabel, uvIndexLabel, uvIndexColor, visibilityLabel } from '../../core/models/settings.model';
-import { getWeatherMeta } from '../../core/models/weather.model';
+import { getWeatherMeta, getSwearyLabel } from '../../core/models/weather.model';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
-import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { Skeleton } from '../../shared/components/loading-skeleton/loading-skeleton.component';
-import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
+import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
 @Component({
   selector: 'nimbus-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [WeatherIcon, GlassCard, Skeleton, TemperaturePipe, WindSpeedPipe],
+  imports: [RouterLink, WeatherIcon, Skeleton, WindSpeedPipe, TemperaturePipe, LowerCasePipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -27,6 +28,7 @@ export class HomeComponent {
   readonly convertTemp = convertTemperature;
   readonly formatTemp = formatTemperature;
   readonly getWeatherMeta = getWeatherMeta;
+  readonly getSwearyLabel = getSwearyLabel;
   readonly windDirectionLabel = windDirectionLabel;
   readonly uvIndexLabel = uvIndexLabel;
   readonly uvIndexColor = uvIndexColor;
@@ -44,6 +46,13 @@ export class HomeComponent {
     return loc.admin1 ? `${loc.admin1}, ${loc.country}` : loc.country;
   }
 
+  get currentDay(): string {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', {
+      weekday: 'long',
+    }).toUpperCase();
+  }
+
   get currentDate(): string {
     const now = new Date();
     return now.toLocaleDateString('en-US', {
@@ -51,6 +60,11 @@ export class HomeComponent {
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  get currentTime(): string {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
   }
 
   formatHour(time: string): string {

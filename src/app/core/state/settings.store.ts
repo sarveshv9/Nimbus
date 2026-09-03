@@ -20,6 +20,8 @@ export class SettingsStore {
   readonly windSpeedUnit = signal<WindSpeedUnit>(DEFAULT_SETTINGS.windSpeedUnit);
   readonly themeMode = signal<ThemeMode>(DEFAULT_SETTINGS.themeMode);
   readonly reducedMotion = signal(DEFAULT_SETTINGS.reducedMotion);
+  readonly swearyLabels = signal(DEFAULT_SETTINGS.swearyLabels);
+
 
   // === DERIVED STATE ===
   readonly resolvedTheme = computed(() => {
@@ -41,13 +43,17 @@ export class SettingsStore {
     this.hydrate();
 
     // Listen for system theme changes
-    if (typeof window !== 'undefined') {
-      window.matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', () => {
-          if (this.themeMode() === 'system') {
-            this.applyTheme();
-          }
-        });
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)')
+          .addEventListener('change', () => {
+            if (this.themeMode() === 'system') {
+              this.applyTheme();
+            }
+          });
+      } catch {
+        // matchMedia event listener not supported in this environment
+      }
     }
 
     // Persist settings on change
@@ -57,6 +63,7 @@ export class SettingsStore {
         windSpeedUnit: this.windSpeedUnit(),
         themeMode: this.themeMode(),
         reducedMotion: this.reducedMotion(),
+        swearyLabels: this.swearyLabels(),
       };
       this.storage.set(STORAGE_KEY, settings);
     });
@@ -99,6 +106,10 @@ export class SettingsStore {
     this.reducedMotion.set(enabled);
   }
 
+  setSwearyLabels(enabled: boolean): void {
+    this.swearyLabels.set(enabled);
+  }
+
   // === PRIVATE ===
 
   private hydrate(): void {
@@ -108,6 +119,7 @@ export class SettingsStore {
       this.windSpeedUnit.set(saved.windSpeedUnit ?? DEFAULT_SETTINGS.windSpeedUnit);
       this.themeMode.set(saved.themeMode ?? DEFAULT_SETTINGS.themeMode);
       this.reducedMotion.set(saved.reducedMotion ?? DEFAULT_SETTINGS.reducedMotion);
+      this.swearyLabels.set(saved.swearyLabels ?? DEFAULT_SETTINGS.swearyLabels);
     }
   }
 

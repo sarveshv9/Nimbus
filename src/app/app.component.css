@@ -3,127 +3,41 @@
   min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
+  background: #000000; /* Darker backdrop outside the app */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .app-content {
   position: relative;
   z-index: var(--z-base);
-  min-height: 100dvh;
+  width: 100%;
+  max-width: 414px; /* Mobile width */
+  height: 100dvh;
+  max-height: 896px;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
 }
 
 /* === MAIN CONTENT === */
 .app-main {
   flex: 1;
-  max-width: var(--container-max);
-  margin: 0 auto;
   width: 100%;
-  padding: var(--space-6);
-  padding-bottom: calc(var(--bottom-nav-height) + var(--space-8));
-}
-
-/* === BOTTOM NAVIGATION — Floating Pill === */
-.bottom-nav {
-  position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: var(--z-sticky);
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 8px;
-  background: rgba(16, 20, 36, 0.72);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.45),
-    0 2px 12px rgba(0, 0, 0, 0.25),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
-  width: auto;
-}
-
-.bottom-nav a,
-.bottom-nav .nav-search-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 6px 16px;
-  border-radius: 999px;
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  min-width: 52px;
   position: relative;
-  white-space: nowrap;
-}
-
-.nav-search-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.bottom-nav a:hover,
-.bottom-nav .nav-search-btn:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.bottom-nav .nav-search-btn:active {
-  transform: scale(0.92);
-}
-
-/* Active tab — glowing pill behind the item */
-.bottom-nav a.active {
-  color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.12);
-}
-
-.bottom-nav a.active svg {
-  stroke-width: 2;
-  filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.35));
-}
-
-/* Subtle glow dot under active tab */
-.bottom-nav a.active::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* === DESKTOP LAYOUT === */
 @media (min-width: 768px) {
-  .app-main {
-    padding-bottom: var(--space-8);
-  }
-
-  .bottom-nav {
-    display: none;
-  }
-}
-
-@media (min-width: 1024px) {
-  .app-main {
-    padding: var(--space-8);
+  .app-content {
+    height: 90vh;
+    border-radius: 44px;
+    overflow: hidden;
+    border: 12px solid #1a1a1a;
+    box-shadow: 0 0 0 1px #333, 0 24px 80px rgba(0, 0, 0, 0.6);
   }
 }

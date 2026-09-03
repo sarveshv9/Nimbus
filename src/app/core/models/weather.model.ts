@@ -75,6 +75,42 @@ export function getWeatherMeta(code: number | null | undefined): WeatherConditio
   return WMO_CODE_MAP[code] ?? UNKNOWN_CONDITION;
 }
 
+/**
+ * Sweary / editorial weather labels for the home hero.
+ * Each entry is a structured phrase matching the Dribbble "It's fucking raining. now." style.
+ * Format: { headline: string, accent?: string, subtitle: string }
+ */
+export interface SwearyLabel {
+  readonly headline: string;
+  readonly accent?: string;
+  readonly subtitle: string;
+}
+
+export const SWEARY_LABELS: Record<WeatherCondition, SwearyLabel> = {
+  'clear':          { headline: "It's fucking\nbeautiful.",  accent: 'beautiful.',  subtitle: 'You can look outside to get more information.' },
+  'partly-cloudy':  { headline: "It's kinda\ncloudy.",       accent: 'cloudy.',     subtitle: 'The sun is playing hide and seek, basically.' },
+  'cloudy':         { headline: "It's fucking\novercast.",    accent: 'overcast.',   subtitle: 'The sky looks like a dirty dishrag.' },
+  'foggy':          { headline: "You can't\nsee shit.",      accent: 'see shit.',   subtitle: "It's foggy as hell out there." },
+  'drizzle':        { headline: "It's fucking\ndrizzling.",   accent: 'drizzling.',  subtitle: "Not quite rain, not quite dry. Just annoying." },
+  'rain':           { headline: "It's fucking\nraining.",     accent: 'raining.',    subtitle: 'You can look outside to get more information.' },
+  'freezing-rain':  { headline: "It's freezing\nfucking rain.", accent: 'rain.',     subtitle: "Nature's way of saying stay the fuck inside." },
+  'snow':           { headline: "It's fucking\nsnowing.",     accent: 'snowing.',    subtitle: "Frozen sky dandruff is falling. Enjoy." },
+  'snow-grains':    { headline: "It's fucking\nsnowing.",     accent: 'snowing.',    subtitle: "Tiny ice bullets. How delightful." },
+  'rain-showers':   { headline: "It's fucking\npouring.",     accent: 'pouring.',    subtitle: "Expect changes throughout the day." },
+  'snow-showers':   { headline: "Shit, it's\nsnowing hard.",  accent: 'snowing hard.', subtitle: "Mother nature lost her mind." },
+  'thunderstorm':   { headline: "Holy shit,\na storm.",       accent: 'a storm.',    subtitle: "Thunder, lightning, the whole damn show." },
+  'unknown':        { headline: "No fucking\nclue.",          accent: 'clue.',       subtitle: "Even the weather doesn't know what it's doing." },
+};
+
+/**
+ * Returns the sweary label for a given weather code, or the clean label if sweary mode is off.
+ */
+export function getSwearyLabel(code: number | null | undefined): SwearyLabel {
+  const meta = getWeatherMeta(code);
+  return SWEARY_LABELS[meta.condition] ?? SWEARY_LABELS['unknown'];
+}
+
+
 export function resolveWeatherTheme(code: number | null | undefined, isNight: boolean): WeatherTheme {
   if (isNight) return 'night';
   return getWeatherMeta(code).theme;

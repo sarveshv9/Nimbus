@@ -1,326 +1,435 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
-import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
+import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
 import {
   windDirectionLabel,
   uvIndexLabel,
-  uvIndexColor,
   visibilityLabel,
   pressureLabel,
 } from '../../core/models/settings.model';
-import { getAqiCategory } from '../../core/models/weather.model';
+import { getAqiCategory, getWeatherMeta } from '../../core/models/weather.model';
 
 @Component({
   selector: 'nimbus-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GlassCard, TemperaturePipe, WindSpeedPipe],
+  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, RouterLink],
   template: `
-    <div class="details-page">
-      <header class="page-header">
-        <h1 class="page-title font-display">Details</h1>
-        <p class="page-subtitle">Comprehensive weather metrics</p>
-      </header>
-
-      @if (weather.currentWeather(); as current) {
-        <div class="bento-grid">
-          <!-- Temperature -->
-          <nimbus-glass-card class="bento-item bento-wide">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></span>
-                <span class="metric-name">Temperature</span>
-              </div>
-              <div class="metric-big-value font-display">{{ current.temperature | temperature }}</div>
-              <div class="metric-detail">Feels like {{ current.feelsLike | temperature }}</div>
-              <div class="thermometer" aria-hidden="true">
-                <div class="thermometer-fill" [style.width.%]="Math.min(100, Math.max(0, (current.temperature + 10) / 60 * 100))"></div>
-              </div>
+    @if (weather.isLoading() && !weather.hasData()) {
+      <div class="loading-state">Loading...</div>
+    } @else {
+      <div class="details-page">
+        <!-- Top Blue Card -->
+        <div class="hero-blue-card">
+          <header class="top-nav">
+            <button class="nav-btn" routerLink="/" aria-label="Back">
+              <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            </button>
+            <div class="page-header">
+              <i class="ph ph-thermometer-simple" style="font-size: 20px;"></i>
+              <span>Details</span>
             </div>
-          </nimbus-glass-card>
+            <button class="nav-btn" style="opacity: 0" aria-hidden="true">
+              <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            </button>
+          </header>
 
-          <!-- Wind Compass -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg></span>
-                <span class="metric-name">Wind</span>
-              </div>
-              <div class="compass" aria-label="Wind direction compass">
-                <svg viewBox="0 0 120 120" class="compass-svg">
-                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-subtle)" stroke-width="1.5" />
-                  <circle cx="60" cy="60" r="35" fill="none" stroke="var(--border-subtle)" stroke-width="0.5" stroke-dasharray="2 4" />
-                  <!-- Cardinal directions -->
-                  <text x="60" y="16" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-weight="600">N</text>
-                  <text x="104" y="64" text-anchor="middle" fill="var(--text-muted)" font-size="10">E</text>
-                  <text x="60" y="112" text-anchor="middle" fill="var(--text-muted)" font-size="10">S</text>
-                  <text x="16" y="64" text-anchor="middle" fill="var(--text-muted)" font-size="10">W</text>
-                  <!-- Arrow -->
-                  <g [style.transform]="'rotate(' + current.windDirection + 'deg)'" style="transform-origin: 60px 60px; transition: transform 1s ease">
-                    <line x1="60" y1="60" x2="60" y2="24" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" />
-                    <polygon points="60,20 55,30 65,30" fill="var(--accent)" />
-                  </g>
-                  <!-- Center dot -->
-                  <circle cx="60" cy="60" r="3" fill="var(--accent)" />
-                </svg>
-              </div>
-              <div class="metric-detail">
-                {{ current.windSpeed | windSpeed }} {{ windDirectionLabel(current.windDirection) }}
-              </div>
-              <div class="metric-sub">Gusts {{ current.windGusts | windSpeed }}</div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- Humidity Ring -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></span>
-                <span class="metric-name">Humidity</span>
-              </div>
-              <div class="ring-container" aria-label="Humidity at {{ current.humidity }} percent">
-                <svg viewBox="0 0 100 100" class="ring-svg">
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border-subtle)" stroke-width="6" />
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="6"
-                    stroke-linecap="round"
-                    [attr.stroke-dasharray]="2 * 3.14159 * 40"
-                    [attr.stroke-dashoffset]="2 * 3.14159 * 40 * (1 - current.humidity / 100)"
-                    style="transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1s ease" />
-                  <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
-                    fill="var(--text-primary)" font-size="22" font-weight="600" font-family="var(--font-display)">
-                    {{ current.humidity }}%
-                  </text>
-                </svg>
-              </div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- Pressure -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/></svg></span>
-                <span class="metric-name">Pressure</span>
-              </div>
-              <div class="metric-big-value font-display">{{ current.pressure }}</div>
-              <div class="metric-unit">hPa</div>
-              <div class="metric-detail">{{ pressureLabel(current.pressure) }}</div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- UV Index -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
-                <span class="metric-name">UV Index</span>
-              </div>
-              <div class="metric-big-value font-display" [style.color]="uvIndexColor(current.uvIndex)">
-                {{ current.uvIndex }}
-              </div>
-              <div class="metric-detail" [style.color]="uvIndexColor(current.uvIndex)">
-                {{ uvIndexLabel(current.uvIndex) }}
-              </div>
-              <div class="uv-gradient-bar" aria-hidden="true">
-                <div class="uv-marker" [style.left.%]="Math.min(100, (current.uvIndex / 11) * 100)"></div>
-              </div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- Visibility -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></span>
-                <span class="metric-name">Visibility</span>
-              </div>
-              <div class="metric-big-value font-display">{{ (current.visibility / 1000).toFixed(0) }}</div>
-              <div class="metric-unit">km</div>
-              <div class="metric-detail">{{ visibilityLabel(current.visibility) }}</div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- Cloud Cover -->
-          <nimbus-glass-card class="bento-item">
-            <div class="metric-visual">
-              <div class="metric-label-row">
-                <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span>
-                <span class="metric-name">Cloud Cover</span>
-              </div>
-              <div class="metric-big-value font-display">{{ current.cloudCover }}%</div>
-              <div class="cloud-bar" aria-hidden="true">
-                <div class="cloud-bar-fill" [style.width.%]="current.cloudCover"></div>
-              </div>
-            </div>
-          </nimbus-glass-card>
-
-          <!-- Air Quality -->
-          @if (weather.airQuality(); as aq) {
-            @if (aq.usAqi !== null) {
-              <nimbus-glass-card class="bento-item">
-                <div class="metric-visual">
-                  <div class="metric-label-row">
-                    <span class="metric-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></span>
-                    <span class="metric-name">Air Quality</span>
-                  </div>
-                  <div class="metric-big-value font-display" [style.color]="getAqiCategory(aq.usAqi!).color">
-                    {{ aq.usAqi }}
-                  </div>
-                  <div class="metric-detail" [style.color]="getAqiCategory(aq.usAqi!).color">
-                    {{ getAqiCategory(aq.usAqi!).label }}
-                  </div>
-                  @if (aq.pm25 !== null) {
-                    <div class="metric-sub">PM2.5: {{ aq.pm25 }} μg/m³</div>
-                  }
+          @if (weather.currentWeather(); as current) {
+            <div class="hero-summary">
+              <div class="hero-weather-row">
+                <nimbus-weather-icon [weatherCode]="current.weatherCode" [size]="90" [isDay]="current.isDay" />
+                <div class="hero-temp-group">
+                  <span class="hero-temp-val">{{ current.temperature | temperature:'value' }}</span>
+                  <span class="hero-temp-deg">°</span>
                 </div>
-              </nimbus-glass-card>
-            }
+              </div>
+
+              <h2 class="hero-condition">{{ getWeatherMeta(current.weatherCode).label }}</h2>
+              <p class="hero-location-name">{{ locationName }}</p>
+
+              @if (weather.todayHighLow(); as hl) {
+                <div class="hero-high-low">
+                  <span class="hl-badge"><i class="ph ph-arrow-up"></i> H: {{ hl.high | temperature }}</span>
+                  <span class="hl-badge"><i class="ph ph-arrow-down"></i> L: {{ hl.low | temperature }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <i class="ph ph-wind stat-icon" style="font-size: 24px;"></i>
+                <span class="stat-val">{{ current.windSpeed | windSpeed }}</span>
+                <span class="stat-lbl">Wind</span>
+              </div>
+              <div class="hero-stat">
+                <i class="ph ph-drop stat-icon" style="font-size: 24px;"></i>
+                <span class="stat-val">{{ current.humidity }}%</span>
+                <span class="stat-lbl">Humidity</span>
+              </div>
+              <div class="hero-stat">
+                <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
+                <span class="stat-val">{{ weather.next24Hours()[0]?.precipitationProbability ?? 0 }}%</span>
+                <span class="stat-lbl">Chance of rain</span>
+              </div>
+            </div>
           }
         </div>
-      } @else {
-        <nimbus-glass-card>
-          <div class="empty-state">
-            <p>No weather data available. Search for a location to see details.</p>
+
+        <!-- Bottom Dark Section -->
+        <div class="details-bottom">
+          <div class="details-section-header">
+            <h2 class="details-section-title">Weather Breakdown</h2>
           </div>
-        </nimbus-glass-card>
-      }
-    </div>
+
+          @if (weather.currentWeather(); as current) {
+            <div class="metrics-grid">
+
+              <!-- Feels Like -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-thermometer" style="font-size: 18px;"></i>
+                  <span class="metric-title">Feels Like</span>
+                </div>
+                <div class="metric-value font-display">{{ current.feelsLike | temperature }}</div>
+                <div class="metric-desc">{{ weather.feelsLikeLabel() }}</div>
+              </div>
+
+              <!-- Sunrise & Sunset -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-sun-horizon" style="font-size: 18px;"></i>
+                  <span class="metric-title">Sunrise</span>
+                </div>
+                <div class="metric-value font-display">{{ formatSunTime(weather.todaySunrise()) }}</div>
+                <div class="metric-desc">Sunset: {{ formatSunTime(weather.todaySunset()) }}</div>
+              </div>
+
+              <!-- Wind Speed -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-wind" style="font-size: 18px;"></i>
+                  <span class="metric-title">Wind</span>
+                </div>
+                <div class="metric-value font-display">{{ current.windSpeed | windSpeed }}</div>
+                <div class="metric-desc">{{ windDirectionLabel(current.windDirection) }} ({{ current.windDirection }}°) • Gusts {{ current.windGusts | windSpeed }}</div>
+              </div>
+
+              <!-- Humidity -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-drop" style="font-size: 18px;"></i>
+                  <span class="metric-title">Humidity</span>
+                </div>
+                <div class="metric-value font-display">{{ current.humidity }}%</div>
+                <div class="metric-desc">{{ humidityDescription(current.humidity) }}</div>
+              </div>
+
+              <!-- Rain / Precipitation -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-cloud-rain" style="font-size: 18px;"></i>
+                  <span class="metric-title">Precipitation</span>
+                </div>
+                <div class="metric-value font-display">{{ weather.next24Hours()[0]?.precipitationProbability ?? 0 }}%</div>
+                <div class="metric-desc">
+                  @if (current.precipitation > 0) {
+                    {{ current.precipitation }} mm expected
+                  } @else {
+                    No rain expected
+                  }
+                </div>
+              </div>
+
+              <!-- Pressure -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-gauge" style="font-size: 18px;"></i>
+                  <span class="metric-title">Pressure</span>
+                </div>
+                <div class="metric-value font-display">{{ current.pressure }} <span class="metric-unit">hPa</span></div>
+                <div class="metric-desc">{{ pressureLabel(current.pressure) }}</div>
+              </div>
+
+              <!-- Visibility -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-eye" style="font-size: 18px;"></i>
+                  <span class="metric-title">Visibility</span>
+                </div>
+                <div class="metric-value font-display">{{ (current.visibility / 1000).toFixed(0) }} <span class="metric-unit">km</span></div>
+                <div class="metric-desc">{{ visibilityLabel(current.visibility) }}</div>
+              </div>
+
+              <!-- UV Index -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-sun" style="font-size: 18px;"></i>
+                  <span class="metric-title">UV Index</span>
+                </div>
+                <div class="metric-value font-display">{{ current.uvIndex }}</div>
+                <div class="metric-desc">{{ uvIndexLabel(current.uvIndex) }}</div>
+              </div>
+
+              <!-- Cloud Cover -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i class="ph ph-cloud" style="font-size: 18px;"></i>
+                  <span class="metric-title">Cloud Cover</span>
+                </div>
+                <div class="metric-value font-display">{{ current.cloudCover }}%</div>
+                <div class="metric-desc">Sky coverage</div>
+              </div>
+
+              <!-- Air Quality -->
+              @if (weather.airQuality(); as aq) {
+                @if (aq.usAqi !== null) {
+                  <div class="metric-card">
+                    <div class="metric-header">
+                      <i class="ph ph-leaf" style="font-size: 18px;"></i>
+                      <span class="metric-title">Air Quality</span>
+                    </div>
+                    <div class="metric-value font-display">{{ aq.usAqi }} <span class="metric-unit">AQI</span></div>
+                    <div class="metric-desc">{{ getAqiCategory(aq.usAqi!).label }} @if (aq.pm25 !== null) { • PM2.5: {{ aq.pm25 }} }</div>
+                  </div>
+                }
+              }
+
+            </div>
+          }
+        </div>
+      </div>
+    }
   `,
   styles: [`
     .details-page {
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
-      animation: fadeInUp var(--duration-slow) var(--ease-decel);
-    }
-    .page-header { padding: var(--space-4) 0; }
-    .page-title { font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--text-primary); }
-    .page-subtitle { font-size: var(--text-base); color: var(--text-muted); margin-top: var(--space-1); }
-
-    .bento-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-4);
-    }
-    @media (min-width: 768px) {
-      .bento-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    @media (min-width: 1024px) {
-      .bento-grid { grid-template-columns: repeat(4, 1fr); }
-    }
-    .bento-wide {
-      grid-column: span 2;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #1E66FF 0%, #1a4fcc 25%, #1a3d8f 50%, #152c5e 75%, #0F121C 100%);
+      color: #FFFFFF;
+      animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
 
-    .metric-visual {
+    /* === TOP BLUE HERO CARD (matching home) === */
+    .hero-blue-card {
+      background: transparent;
+      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
+      display: flex;
+      flex-direction: column;
+      color: #FFFFFF;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .nav-btn {
+      color: #FFFFFF;
+      opacity: 0.9;
+      padding: var(--space-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+    }
+
+    .hero-summary {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-2);
-      text-align: center;
+      margin: var(--space-2) 0 var(--space-8) 0;
     }
-    .metric-label-row {
+
+    .hero-weather-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-2);
+    }
+
+    .hero-temp-group {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .hero-temp-val {
+      font-family: var(--font-display);
+      font-size: 80px;
+      font-weight: var(--weight-bold);
+      letter-spacing: -2px;
+      line-height: 0.85;
+    }
+
+    .hero-temp-deg {
+      font-size: 36px;
+      font-weight: var(--weight-medium);
+      margin-top: -4px;
+    }
+
+    .hero-condition {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-semibold);
+      margin-bottom: 2px;
+    }
+
+    .hero-location-name {
+      font-size: var(--text-sm);
+      opacity: 0.85;
+      font-weight: var(--weight-medium);
+      margin-bottom: var(--space-3);
+    }
+
+    .hero-high-low {
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    .hl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: var(--weight-semibold);
+      letter-spacing: 0.2px;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--space-4);
+      position: relative;
+    }
+
+    .hero-stats::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-icon {
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .stat-val {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    /* === BOTTOM SECTION (Frosted Glass Cards) === */
+    .details-bottom {
+      padding: var(--space-6) var(--space-6) var(--space-12) var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .details-section-header {
+      margin-bottom: var(--space-1);
+    }
+
+    .details-section-title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      padding: var(--space-4) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .metric-header {
       display: flex;
       align-items: center;
       gap: var(--space-2);
       font-size: var(--text-xs);
       font-weight: var(--weight-semibold);
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.6);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .metric-icon {
-      display: inline-flex;
+
+    .metric-header i {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .metric-value {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      color: #FFFFFF;
+      margin-top: var(--space-1);
+      line-height: 1.1;
+    }
+
+    .metric-unit {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-normal);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .metric-desc {
+      font-size: var(--text-xs);
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: var(--weight-medium);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .loading-state {
+      display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--text-muted);
-    }
-    .metric-big-value {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-bold);
-      color: var(--text-primary);
-      line-height: 1;
-    }
-    .metric-unit {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      margin-top: -4px;
-    }
-    .metric-detail {
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-      font-weight: var(--weight-medium);
-    }
-    .metric-sub {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-    }
-
-    /* Compass */
-    .compass { width: 120px; height: 120px; }
-    .compass-svg { width: 100%; height: 100%; }
-
-    /* Humidity Ring */
-    .ring-container { width: 100px; height: 100px; }
-    .ring-svg { width: 100%; height: 100%; }
-
-    /* Thermometer */
-    .thermometer {
-      width: 100%;
-      height: 6px;
-      background: var(--border-subtle);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-    }
-    .thermometer-fill {
-      height: 100%;
-      background: linear-gradient(90deg, hsl(200, 70%, 55%), hsl(38, 92%, 55%), hsl(0, 70%, 55%));
-      border-radius: var(--radius-full);
-      transition: width 1s ease;
-    }
-
-    /* UV Scale */
-    .uv-gradient-bar {
-      width: 100%;
-      height: 6px;
-      background: linear-gradient(90deg, hsl(120,60%,45%), hsl(48,90%,50%), hsl(30,85%,55%), hsl(0,70%,50%), hsl(280,60%,40%));
-      border-radius: var(--radius-full);
-      position: relative;
-      margin-top: var(--space-2);
-    }
-    .uv-marker {
-      position: absolute;
-      top: -3px;
-      width: 12px;
-      height: 12px;
-      background: var(--bg-surface-solid);
-      border: 2px solid var(--accent);
-      border-radius: 50%;
-      transform: translateX(-50%);
-      transition: left 1s ease;
-    }
-
-    /* Cloud bar */
-    .cloud-bar {
-      width: 100%;
-      height: 6px;
-      background: var(--border-subtle);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-    }
-    .cloud-bar-fill {
-      height: 100%;
-      background: var(--text-muted);
-      border-radius: var(--radius-full);
-      transition: width 1s ease;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: var(--space-12);
-      color: var(--text-muted);
+      height: 100vh;
+      color: rgba(255, 255, 255, 0.5);
     }
   `],
 })
@@ -330,9 +439,27 @@ export class DetailsComponent {
 
   readonly windDirectionLabel = windDirectionLabel;
   readonly uvIndexLabel = uvIndexLabel;
-  readonly uvIndexColor = uvIndexColor;
   readonly visibilityLabel = visibilityLabel;
   readonly pressureLabel = pressureLabel;
   readonly getAqiCategory = getAqiCategory;
-  readonly Math = Math;
+  readonly getWeatherMeta = getWeatherMeta;
+
+  get locationName(): string {
+    const loc = this.weather.selectedLocation();
+    if (!loc) return 'Current Location';
+    return loc.admin1 ? `${loc.name}, ${loc.admin1}` : `${loc.name}, ${loc.country}`;
+  }
+
+  formatSunTime(time: string | null): string {
+    if (!time) return '--:--';
+    const date = new Date(time);
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+
+  humidityDescription(humidity: number): string {
+    if (humidity <= 30) return 'Dry air';
+    if (humidity <= 60) return 'Comfortable';
+    if (humidity <= 80) return 'Humid';
+    return 'Very humid';
+  }
 }

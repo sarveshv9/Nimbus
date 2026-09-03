@@ -11,6 +11,7 @@ export interface UserSettings {
   readonly windSpeedUnit: WindSpeedUnit;
   readonly themeMode: ThemeMode;
   readonly reducedMotion: boolean;
+  readonly swearyLabels: boolean;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -18,6 +19,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   windSpeedUnit: 'kmh',
   themeMode: 'system',
   reducedMotion: false,
+  swearyLabels: true,
 };
 
 // === UNIT CONVERSION ===

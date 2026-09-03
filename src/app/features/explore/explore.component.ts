@@ -1,167 +1,176 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnInit, OnDestroy, ElementRef, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, switchMap, distinctUntilChanged, takeUntil } from 'rxjs';
 import { WeatherStore } from '../../core/state/weather.store';
 import { LocationStore } from '../../core/state/location.store';
 import { GeocodingService } from '../../core/services/geocoding.service';
-import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { GeoLocation, formatLocationName } from '../../core/models/location.model';
 
 @Component({
   selector: 'nimbus-explore',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GlassCard],
+  imports: [RouterLink],
   template: `
     <div class="explore-page">
-      <header class="page-header">
-        <h1 class="page-title font-display">Search</h1>
-        <p class="page-subtitle">Find weather for any location</p>
-      </header>
+      <!-- Top Navigation -->
+      <nav class="top-nav">
+        <a routerLink="/" class="nav-btn" aria-label="Back">
+          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+        </a>
+        <div class="location-header">
+          <h1 class="page-title">Search</h1>
+        </div>
+        <div class="nav-btn" style="opacity: 0">
+          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+        </div>
+      </nav>
 
-      <!-- Search Input -->
-      <div class="search-container">
-        <div class="search-input-wrapper">
-          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
-          <input
-            #searchInput
-            type="text"
-            class="search-input"
-            placeholder="Search for a city..."
-            [value]="query()"
-            (input)="onInput($event)"
-            aria-label="Search for a city"
-            autocomplete="off"
-          />
-          @if (query().length > 0) {
-            <button class="clear-btn" (click)="clearSearch()" aria-label="Clear search">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-              </svg>
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Search Results -->
-      @if (isSearching()) {
-        <div class="search-status">
-          <div class="search-spinner"></div>
-          <span>Searching...</span>
-        </div>
-      } @else if (query().length > 0 && results().length === 0) {
-        <div class="search-status">
-          <span>No locations found for "{{ query() }}"</span>
-        </div>
-      } @else if (results().length > 0) {
-        <section>
-          <h2 class="section-label">Results</h2>
-          <div class="locations-list">
-            @for (result of results(); track result.id) {
-              <button class="result-item" (click)="selectLocation(result)">
-                <div class="result-info">
-                  <span class="result-name">{{ result.name }}</span>
-                  <span class="result-region">{{ formatLocation(result) }}</span>
-                </div>
-                @if (locationStore.isLocationSaved(result.id)) {
-                  <span class="saved-indicator" aria-label="Saved">★</span>
-                }
+      <div class="page-content">
+        <!-- Search Input -->
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <i class="ph ph-magnifying-glass search-icon" style="font-size: 20px;"></i>
+            <input
+              #searchInput
+              type="text"
+              class="search-input"
+              placeholder="Search for a city..."
+              [value]="query()"
+              (input)="onInput($event)"
+              aria-label="Search for a city"
+              autocomplete="off"
+            />
+            @if (query().length > 0) {
+              <button class="clear-btn" (click)="clearSearch()" aria-label="Clear search">
+                <i class="ph ph-x" style="font-size: 16px;"></i>
               </button>
             }
           </div>
-        </section>
-      }
+        </div>
 
-      <!-- Recent & Saved (Show when not searching) -->
-      @if (query().length === 0) {
-        @if (locationStore.recentSearches().length > 0) {
+        <!-- Search Results -->
+        @if (isSearching()) {
+          <div class="search-status">
+            <i class="ph ph-spinner search-spinner" style="font-size: 24px; color: var(--accent);"></i>
+            <span>Searching...</span>
+          </div>
+        } @else if (query().length > 0 && results().length === 0) {
+          <div class="search-status">
+            <span>No locations found for "{{ query() }}"</span>
+          </div>
+        } @else if (results().length > 0) {
           <section>
-            <div class="section-header">
-              <h2 class="section-label">Recent Searches</h2>
-              <button class="text-btn" (click)="locationStore.clearRecentSearches()">Clear</button>
-            </div>
-            <div class="locations-grid">
-              @for (location of locationStore.recentSearches(); track location.id) {
-                <nimbus-glass-card [interactive]="true" (click)="selectLocation(location)">
-                  <div class="location-card">
-                    <div class="location-info">
-                      <h3 class="location-name">{{ location.name }}</h3>
-                      <p class="location-region">{{ formatLocation(location) }}</p>
-                    </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round">
-                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
+            <h2 class="section-label">Results</h2>
+            <div class="locations-list">
+              @for (result of results(); track result.id) {
+                <button class="result-item" (click)="selectLocation(result)">
+                  <div class="result-info">
+                    <span class="result-name">{{ result.name }}</span>
+                    <span class="result-region">{{ formatLocation(result) }}</span>
                   </div>
-                </nimbus-glass-card>
+                  @if (locationStore.isLocationSaved(result.id)) {
+                    <i class="ph-fill ph-star saved-indicator"></i>
+                  }
+                </button>
               }
             </div>
           </section>
         }
 
-        @if (locationStore.hasSavedLocations()) {
-          <section>
-            <h2 class="section-label">Saved Locations</h2>
-            <div class="locations-grid">
-              @for (location of locationStore.savedLocations(); track location.id) {
-                <nimbus-glass-card [interactive]="true" (click)="selectLocation(location)">
-                  <div class="location-card">
-                    <div class="location-info">
-                      <h3 class="location-name">{{ location.name }}</h3>
-                      <p class="location-region">{{ formatLocation(location) }}</p>
+        <!-- Recent & Saved (Show when not searching) -->
+        @if (query().length === 0) {
+          @if (locationStore.recentSearches().length > 0) {
+            <section>
+              <div class="section-header">
+                <h2 class="section-label">Recent Searches</h2>
+                <button class="text-btn" (click)="locationStore.clearRecentSearches()">Clear</button>
+              </div>
+              <div class="locations-list">
+                @for (location of locationStore.recentSearches(); track location.id) {
+                  <button class="result-item" (click)="selectLocation(location)">
+                    <div class="result-info">
+                      <span class="result-name">{{ location.name }}</span>
+                      <span class="result-region">{{ formatLocation(location) }}</span>
                     </div>
-                    <span class="saved-indicator">★</span>
-                  </div>
-                </nimbus-glass-card>
-              }
-            </div>
-          </section>
+                    <i class="ph ph-clock-counter-clockwise" style="font-size: 20px; color: var(--text-muted);"></i>
+                  </button>
+                }
+              </div>
+            </section>
+          }
+
+          @if (locationStore.hasSavedLocations()) {
+            <section>
+              <h2 class="section-label">Saved Locations</h2>
+              <div class="locations-list">
+                @for (location of locationStore.savedLocations(); track location.id) {
+                  <button class="result-item" (click)="selectLocation(location)">
+                    <div class="result-info">
+                      <span class="result-name">{{ location.name }}</span>
+                      <span class="result-region">{{ formatLocation(location) }}</span>
+                    </div>
+                    <i class="ph-fill ph-star saved-indicator"></i>
+                  </button>
+                }
+              </div>
+            </section>
+          }
         }
-      }
+      </div>
     </div>
   `,
   styles: [`
     .explore-page {
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
-      animation: fadeInUp var(--duration-slow) var(--ease-decel);
-    }
-    .page-header {
-      padding: var(--space-2) 0;
-    }
-    .page-title {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-bold);
+      min-height: 100vh;
+      background: var(--bg-primary); /* Deep dark background */
       color: var(--text-primary);
+      animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
-    .page-subtitle {
-      font-size: var(--text-base);
-      color: var(--text-muted);
-      margin-top: var(--space-1);
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-6);
+    }
+
+    .nav-btn {
+      color: #FFFFFF;
+      opacity: 0.9;
+      padding: var(--space-2);
+      cursor: pointer;
+    }
+
+    .page-title {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+    }
+
+    .page-content {
+      padding: 0 var(--space-6) var(--space-8) var(--space-6);
     }
 
     /* Search Input Styles */
     .search-container {
-      margin-bottom: var(--space-2);
+      margin-bottom: var(--space-6);
     }
     .search-input-wrapper {
       display: flex;
       align-items: center;
       gap: var(--space-3);
       padding: var(--space-4) var(--space-5);
-      background: rgba(16, 20, 36, 0.6);
-      backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--bg-secondary);
       border-radius: var(--radius-xl);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       transition: all 0.3s ease;
+      border: 1px solid transparent;
     }
     .search-input-wrapper:focus-within {
-      background: rgba(16, 20, 36, 0.8);
-      border-color: rgba(var(--accent-rgb), 0.5);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(var(--accent-rgb), 0.5);
+      background: var(--bg-secondary);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent);
     }
     .search-icon {
       color: var(--accent);
@@ -177,14 +186,14 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       outline: none;
     }
     .search-input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--text-muted);
       font-weight: 400;
     }
     .clear-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.1);
+      background: transparent;
       border: none;
       border-radius: 50%;
       width: 24px;
@@ -194,7 +203,6 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       transition: all 0.2s ease;
     }
     .clear-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
       color: var(--text-primary);
     }
 
@@ -210,12 +218,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       font-size: var(--text-base);
     }
     .search-spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s cubic-bezier(0.6, 0.1, 0.4, 0.9) infinite;
+      animation: spin 0.8s linear infinite;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -224,7 +227,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
     .locations-list {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: var(--space-3);
     }
     .result-item {
       display: flex;
@@ -232,23 +235,23 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       justify-content: space-between;
       width: 100%;
       padding: var(--space-4) var(--space-5);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--bg-secondary);
+      border: none;
       border-radius: var(--radius-lg);
       cursor: pointer;
       transition: all 0.2s ease;
       text-align: left;
       color: inherit;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     .result-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.1);
       transform: translateX(4px);
     }
     .result-info {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
     .result-name {
       font-size: var(--text-base);
@@ -261,6 +264,9 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
     }
 
     /* Sections */
+    section {
+      margin-bottom: var(--space-6);
+    }
     .section-header {
       display: flex;
       align-items: center;
@@ -270,7 +276,7 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
     .section-label {
       font-size: 12px;
       font-weight: 700;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       margin-bottom: 0;
@@ -294,39 +300,6 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       color: var(--danger);
     }
 
-    /* Grid layout */
-    .locations-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--space-3);
-    }
-    @media (min-width: 768px) {
-      .locations-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    .location-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-3);
-    }
-    .location-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .location-name {
-      font-size: var(--text-base);
-      font-weight: 500;
-      color: var(--text-primary);
-      margin: 0;
-    }
-    .location-region {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      margin: 0;
-    }
     .saved-indicator {
       color: var(--warning);
       font-size: var(--text-lg);

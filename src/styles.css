@@ -3,6 +3,11 @@
    Premium Angular Weather Experience
    ============================================================ */
 
+/* === PHOSPHOR ICONS WEBFONT === */
+@import url('https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css');
+@import url('https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css');
+@import url('https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css');
+
 /* === RESET === */
 *,
 *::before,
@@ -119,12 +124,12 @@ ul, ol {
   --radius-2xl: 2rem;
   --radius-full: 9999px;
 
-  /* Shadows — deep and colorful */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.2);
-  --shadow-glow: 0 0 50px rgba(var(--accent-rgb), 0.25);
+  /* Shadows — clean and flat */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 20px rgba(var(--accent-rgb), 0.3);
 
   /* Motion */
   --duration-instant: 100ms;
@@ -146,148 +151,87 @@ ul, ol {
   --z-toast: 500;
   --z-effects: -1;
 
-  /* Glass — premium frosted glass */
-  --glass-blur: 28px;
-  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  /* Card Borders */
+  --card-border: none;
 
   /* Layout */
   --container-max: 1200px;
   --nav-height: 64px;
   --bottom-nav-height: 72px;
 
-  /* === VIBRANT DARK PALETTE === */
-  --bg-primary: hsl(230, 35%, 7%);
-  --bg-secondary: hsl(230, 30%, 11%);
-  --bg-surface: rgba(255, 255, 255, 0.07);
-  --bg-surface-hover: rgba(255, 255, 255, 0.12);
-  --bg-surface-solid: hsl(230, 25%, 14%);
-  --bg-overlay: rgba(0, 0, 0, 0.65);
+  /* === VIBRANT THEME VARIABLES (Base/Fallback) === */
+  --bg-primary: #0F121C;
+  --bg-secondary: #171A26;
+  --bg-surface: #0F121C;
+  --bg-surface-hover: #1A1D2C;
+  --bg-surface-solid: #0F121C;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
 
-  --text-primary: hsl(0, 0%, 96%);
-  --text-secondary: hsl(215, 20%, 72%);
-  --text-muted: hsl(215, 12%, 50%);
-  --text-inverse: hsl(220, 25%, 12%);
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AEC0;
+  --text-muted: #718096;
+  --text-inverse: #0F121C;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
 
-  --accent: hsl(215, 100%, 62%);
-  --accent-hover: hsl(215, 100%, 72%);
-  --accent-rgb: 66, 153, 255;
+  --accent: #2185FF;
+  --accent-hover: #33C5FF;
+  --accent-rgb: 33, 133, 255;
 
-  --success: hsl(155, 72%, 52%);
-  --warning: hsl(42, 100%, 60%);
-  --danger: hsl(0, 85%, 62%);
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
 
-  --glass-bg: rgba(255, 255, 255, 0.06);
-  --glass-border-color: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+  --gradient-blue: linear-gradient(160deg, #35C4FF, #1E66FF);
 }
 
-/* Force vibrant dark on all theme attributes */
-[data-theme="light"],
+/* Light Theme (Override to be the same, since we want a unified specific layout) */
+[data-theme="light"] {
+  --bg-primary: #0F121C;
+  --bg-secondary: #171A26;
+  --bg-surface: #0F121C;
+  --bg-surface-hover: #1A1D2C;
+  --bg-surface-solid: #0F121C;
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AEC0;
+  --text-muted: #718096;
+  --text-inverse: #0F121C;
+  
+  --accent: #2185FF;
+  --accent-hover: #33C5FF;
+  --accent-rgb: 33, 133, 255;
+}
+
+/* Dark Theme */
 [data-theme="dark"] {
-  --bg-primary: hsl(230, 35%, 7%);
-  --bg-secondary: hsl(230, 30%, 11%);
-  --bg-surface: rgba(255, 255, 255, 0.07);
-  --bg-surface-hover: rgba(255, 255, 255, 0.12);
-  --bg-surface-solid: hsl(230, 25%, 14%);
-  --bg-overlay: rgba(0, 0, 0, 0.65);
-  --text-primary: hsl(0, 0%, 96%);
-  --text-secondary: hsl(215, 20%, 72%);
-  --text-muted: hsl(215, 12%, 50%);
-  --text-inverse: hsl(220, 25%, 12%);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.22);
-  --accent: hsl(215, 100%, 62%);
-  --accent-hover: hsl(215, 100%, 72%);
-  --accent-rgb: 66, 153, 255;
-  --glass-bg: rgba(255, 255, 255, 0.06);
-  --glass-border-color: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+  --bg-primary: #0F121C;
+  --bg-secondary: #171A26;
+  --bg-surface: #0F121C;
+  --bg-surface-hover: #1A1D2C;
+  --bg-surface-solid: #0F121C;
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AEC0;
+  --text-muted: #718096;
+  --text-inverse: #0F121C;
+  
+  --accent: #2185FF;
+  --accent-hover: #33C5FF;
+  --accent-rgb: 33, 133, 255;
 }
 
-/* === VIBRANT WEATHER THEME OVERRIDES === */
-[data-weather="clear"] {
-  --weather-accent: hsl(42, 100%, 62%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(225, 55%, 14%) 0%,
-    hsl(210, 65%, 22%) 35%,
-    hsl(190, 50%, 18%) 65%,
-    hsl(35, 45%, 18%) 100%);
-  --weather-surface: rgba(255, 200, 50, 0.06);
-  --accent: hsl(42, 100%, 62%);
-  --accent-rgb: 255, 191, 61;
-}
 
-[data-weather="cloudy"] {
-  --weather-accent: hsl(220, 50%, 65%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(225, 35%, 12%) 0%,
-    hsl(218, 40%, 18%) 40%,
-    hsl(230, 30%, 22%) 100%);
-  --weather-surface: rgba(140, 170, 230, 0.06);
-  --accent: hsl(220, 70%, 65%);
-  --accent-rgb: 110, 155, 235;
-}
-
-[data-weather="rain"] {
-  --weather-accent: hsl(200, 85%, 58%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(230, 40%, 8%) 0%,
-    hsl(215, 55%, 16%) 35%,
-    hsl(200, 45%, 14%) 65%,
-    hsl(220, 35%, 10%) 100%);
-  --weather-surface: rgba(60, 140, 220, 0.06);
-  --accent: hsl(200, 85%, 58%);
-  --accent-rgb: 56, 172, 240;
-}
-
-[data-weather="storm"] {
-  --weather-accent: hsl(270, 75%, 65%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(260, 40%, 8%) 0%,
-    hsl(275, 45%, 14%) 35%,
-    hsl(240, 35%, 12%) 65%,
-    hsl(260, 30%, 7%) 100%);
-  --weather-surface: rgba(150, 80, 230, 0.06);
-  --accent: hsl(270, 75%, 65%);
-  --accent-rgb: 160, 100, 230;
-}
-
-[data-weather="snow"] {
-  --weather-accent: hsl(195, 80%, 68%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(215, 30%, 12%) 0%,
-    hsl(210, 40%, 18%) 40%,
-    hsl(200, 30%, 22%) 100%);
-  --weather-surface: rgba(150, 210, 245, 0.06);
-  --accent: hsl(195, 80%, 68%);
-  --accent-rgb: 100, 200, 240;
-}
-
-[data-weather="night"] {
-  --weather-accent: hsl(245, 75%, 72%);
-  --weather-bg: linear-gradient(150deg,
-    hsl(240, 45%, 5%) 0%,
-    hsl(255, 40%, 10%) 35%,
-    hsl(230, 35%, 8%) 65%,
-    hsl(250, 30%, 5%) 100%);
-  --weather-surface: rgba(120, 100, 220, 0.06);
-  --accent: hsl(245, 75%, 72%);
-  --accent-rgb: 140, 115, 230;
-}
 
 /* === UTILITY CLASSES === */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: var(--glass-border);
-  border-color: var(--glass-border-color);
-  box-shadow: var(--glass-shadow);
+  background: var(--bg-surface);
+  border: var(--card-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
 }
 
 .container {
@@ -321,19 +265,14 @@ ul, ol {
 }
 
 /* === SCROLLBAR STYLING === */
+* {
+  scrollbar-width: none; /* Firefox */
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-strong);
+  display: none; /* Safari and Chrome */
+  width: 0;
+  height: 0;
 }
 
 /* === REDUCED MOTION === */

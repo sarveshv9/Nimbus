@@ -123,6 +123,18 @@ export class WeatherService {
     );
   }
 
+  fetchCurrentWeatherOnly(lat: number, lon: number): Observable<CurrentWeather> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lon.toString())
+      .set('current', CURRENT_PARAMS)
+      .set('timezone', 'auto');
+
+    return this.http.get<{ current: Record<string, number | string> }>(FORECAST_API, { params }).pipe(
+      map(response => this.mapCurrentWeather(response.current))
+    );
+  }
+
   private fetchAirQuality(lat: number, lon: number): Observable<AirQuality | null> {
     const params = new HttpParams()
       .set('latitude', lat.toString())

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { WeatherStore } from './core/state/weather.store';
 import { SettingsStore } from './core/state/settings.store';
 import { LocationStore } from './core/state/location.store';
@@ -11,8 +11,6 @@ import { WeatherEffectsComponent } from './layout/weather-effects/weather-effect
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
     WeatherEffectsComponent,
   ],
   template: `
@@ -29,26 +27,6 @@ import { WeatherEffectsComponent } from './layout/weather-effects/weather-effect
         <main class="app-main">
           <router-outlet />
         </main>
-
-        <!-- Bottom navigation (mobile) — floating pill -->
-        <nav class="bottom-nav" aria-label="Main navigation">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" aria-label="Home">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span>Home</span>
-          </a>
-          <a routerLink="/forecast" routerLinkActive="active" aria-label="Forecast">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-            <span>Forecast</span>
-          </a>
-          <a routerLink="/explore" routerLinkActive="active" aria-label="Search locations" title="Search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <span>Search</span>
-          </a>
-          <a routerLink="/locations" routerLinkActive="active" aria-label="Saved locations">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Saved</span>
-          </a>
-        </nav>
       </div>
     </div>
   `,

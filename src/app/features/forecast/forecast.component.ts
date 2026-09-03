@@ -1,335 +1,286 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
-import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
-import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
-import { HourlyForecast } from '../../core/models/weather.model';
-import { uvIndexLabel, uvIndexColor } from '../../core/models/settings.model';
-
-type ForecastMetric = 'temperature' | 'precipitation' | 'wind' | 'humidity' | 'uv';
+import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
+import { getWeatherMeta } from '../../core/models/weather.model';
 
 @Component({
   selector: 'nimbus-forecast',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GlassCard, WeatherIcon, TemperaturePipe, WindSpeedPipe],
+  imports: [RouterLink, WeatherIcon, WindSpeedPipe, TemperaturePipe],
   template: `
-    <div class="forecast-page">
-      <header class="page-header">
-        <h1 class="page-title font-display">Forecast</h1>
-        <p class="page-subtitle">Detailed weather metrics over time</p>
-      </header>
+    @if (weather.isLoading() && !weather.hasData()) {
+      <div class="loading-state">Loading...</div>
+    } @else {
+      <div class="forecast-page">
+        <!-- Top Blue Card -->
+        <div class="hero-blue-card">
+          <header class="top-nav">
+            <button class="nav-btn" routerLink="/" aria-label="Back">
+              <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            </button>
+            <div class="page-header">
+              <i class="ph ph-calendar-blank" style="font-size: 20px;"></i>
+              <span>7 days</span>
+            </div>
+            <button class="nav-btn" aria-label="Options">
+              <i class="ph ph-dots-three" style="font-size: 28px;"></i>
+            </button>
+          </header>
 
-      <!-- Metric Tabs -->
-      <div class="metric-tabs" role="tablist" aria-label="Forecast metric selection">
-        @for (metric of metrics; track metric.id) {
-          <button
-            class="metric-tab"
-            [class.active]="selectedMetric() === metric.id"
-            (click)="selectedMetric.set(metric.id)"
-            role="tab"
-            [attr.aria-selected]="selectedMetric() === metric.id"
-          >
-            {{ metric.label }}
-          </button>
-        }
-      </div>
+          <div class="tomorrow-info">
+            <h2 class="tomorrow-title">Tomorrow</h2>
+            <div class="tomorrow-weather">
+              <nimbus-weather-icon [weatherCode]="tomorrow()?.weatherCode" [size]="100" />
+              <div class="tomorrow-temp-group">
+                <span class="tomorrow-high">{{ tomorrow()?.tempMax | temperature:'value' }}</span>
+                <span class="tomorrow-low">/{{ tomorrow()?.tempMin | temperature }}</span>
+              </div>
+            </div>
+            <p class="tomorrow-condition">{{ getWeatherMeta(tomorrow()?.weatherCode).label }}</p>
+          </div>
 
-      <!-- Chart Area -->
-      <nimbus-glass-card>
-        <div class="chart-container" role="img" [attr.aria-label]="selectedMetric() + ' forecast chart'">
-          <svg viewBox="0 0 800 200" preserveAspectRatio="none" class="forecast-chart">
-            <!-- Grid lines -->
-            <g stroke="var(--border-subtle)" stroke-width="1">
-              @for (y of [40, 80, 120, 160]; track y) {
-                <line [attr.x1]="0" [attr.y1]="y" [attr.x2]="800" [attr.y2]="y" stroke-dasharray="4 4" />
-              }
-            </g>
-
-            <!-- Data visualization -->
-            @if (chartPoints().length > 0) {
-              @if (selectedMetric() === 'precipitation') {
-                <!-- Bar chart for precipitation -->
-                @for (point of chartPoints(); track point.x) {
-                  <rect
-                    [attr.x]="point.x - 12"
-                    [attr.y]="point.y"
-                    [attr.width]="24"
-                    [attr.height]="200 - point.y"
-                    fill="var(--accent)"
-                    opacity="0.6"
-                    rx="4"
-                  />
-                }
-              } @else {
-                <!-- Line chart for other metrics -->
-                <path
-                  [attr.d]="chartLinePath()"
-                  fill="none"
-                  stroke="var(--accent)"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <!-- Gradient fill -->
-                <path
-                  [attr.d]="chartAreaPath()"
-                  fill="url(#chart-gradient)"
-                  opacity="0.15"
-                />
-                <defs>
-                  <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="var(--accent)" />
-                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-                <!-- Data points -->
-                @for (point of chartPoints(); track point.x; let i = $index) {
-                  @if (i % 3 === 0) {
-                    <circle [attr.cx]="point.x" [attr.cy]="point.y" r="3" fill="var(--accent)" />
-                  }
-                }
-              }
-            }
-          </svg>
-
-          <!-- X-axis labels -->
-          <div class="chart-labels">
-            @for (point of chartPoints(); track point.x; let i = $index) {
-              @if (i % 4 === 0) {
-                <span class="chart-label" [style.left.%]="(point.x / 800) * 100">{{ point.label }}</span>
-              }
-            }
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <i class="ph ph-wind stat-icon" style="font-size: 24px;"></i>
+              <span class="stat-val">{{ tomorrow()?.windSpeedMax | windSpeed }}</span>
+              <span class="stat-lbl">Wind</span>
+            </div>
+            <div class="hero-stat">
+              <i class="ph ph-drop stat-icon" style="font-size: 24px;"></i>
+              <span class="stat-val">50%</span>
+              <span class="stat-lbl">Humidity</span>
+            </div>
+            <div class="hero-stat">
+              <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
+              <span class="stat-val">{{ tomorrow()?.precipitationProbabilityMax ?? 0 }}%</span>
+              <span class="stat-lbl">Chance of rain</span>
+            </div>
           </div>
         </div>
-      </nimbus-glass-card>
 
-      <!-- Day-by-day detail list -->
-      <nimbus-glass-card variant="flush">
-        <div class="section-header">
-          <h2 class="section-title">Daily Breakdown</h2>
-        </div>
-        <div class="daily-detail-list">
-          @for (day of weather.dailyForecast(); track day.date) {
-            <div class="daily-detail-item">
-              <div class="daily-detail-main">
-                <nimbus-weather-icon [weatherCode]="day.weatherCode" [size]="28" />
-                <div class="daily-detail-info">
-                  <span class="daily-detail-day">{{ formatDay(day.date) }}</span>
-                  <span class="daily-detail-range">{{ day.tempMin | temperature }} — {{ day.tempMax | temperature }}</span>
-                </div>
+        <!-- Dark Bottom List -->
+        <div class="forecast-list">
+          @for (day of sevenDays(); track day.date) {
+            <div class="forecast-item">
+              <span class="forecast-day">{{ formatDayShort(day.date) }}</span>
+              <div class="forecast-condition">
+                <nimbus-weather-icon [weatherCode]="day.weatherCode" [size]="24" />
+                <span class="forecast-cond-text">{{ getWeatherMeta(day.weatherCode).label }}</span>
               </div>
-              <div class="daily-detail-metrics">
-                <span class="detail-metric">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-                  {{ day.precipitationProbabilityMax }}%
-                </span>
-                <span class="detail-metric">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/></svg>
-                  {{ day.windSpeedMax | windSpeed }}
-                </span>
-                <span class="detail-metric" [style.color]="uvIndexColor(day.uvIndexMax)">
-                  UV {{ day.uvIndexMax }}
-                </span>
+              <div class="forecast-temps">
+                <span class="forecast-high">{{ day.tempMax | temperature }}</span>
+                <span class="forecast-low">{{ day.tempMin | temperature }}</span>
               </div>
             </div>
           }
         </div>
-      </nimbus-glass-card>
-    </div>
+      </div>
+    }
   `,
   styles: [`
     .forecast-page {
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
-      animation: fadeInUp var(--duration-slow) var(--ease-decel);
-    }
-    .page-header { padding: var(--space-4) 0; }
-    .page-title {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-bold);
+      min-height: 100vh;
+      background: var(--bg-primary); /* Deep dark background */
       color: var(--text-primary);
+      animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
-    .page-subtitle {
-      font-size: var(--text-base);
-      color: var(--text-muted);
-      margin-top: var(--space-1);
-    }
-    .metric-tabs {
+
+    .hero-blue-card {
+      background: var(--gradient-blue);
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6);
       display: flex;
-      gap: var(--space-2);
-      overflow-x: auto;
-      padding-bottom: var(--space-2);
+      flex-direction: column;
+      color: #FFFFFF;
+      box-shadow: inset 0 -20px 40px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.3);
     }
-    .metric-tabs::-webkit-scrollbar { display: none; }
-    .metric-tab {
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-full);
-      font-size: var(--text-sm);
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .nav-btn {
+      color: #FFFFFF;
+      opacity: 0.9;
+      padding: var(--space-2);
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+    }
+
+    .tomorrow-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-4) 0 var(--space-8) 0;
+    }
+
+    .tomorrow-title {
+      font-size: var(--text-lg);
       font-weight: var(--weight-medium);
-      color: var(--text-muted);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      white-space: nowrap;
-      transition: all var(--duration-fast) var(--ease-default);
+      opacity: 0.9;
+      margin-bottom: var(--space-4);
     }
-    .metric-tab:hover { color: var(--text-primary); border-color: var(--border-default); }
-    .metric-tab.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
+
+    .tomorrow-weather {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-2);
     }
-    .chart-container {
+
+    .tomorrow-temp-group {
+      display: flex;
+      align-items: baseline;
+    }
+
+    .tomorrow-high {
+      font-family: var(--font-display);
+      font-size: 72px;
+      font-weight: var(--weight-bold);
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .tomorrow-low {
+      font-size: 28px;
+      font-weight: var(--weight-medium);
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+
+    .tomorrow-condition {
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      opacity: 0.9;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--space-4);
       position: relative;
-      padding: var(--space-4);
     }
-    .forecast-chart {
-      width: 100%;
-      height: 200px;
-    }
-    .chart-labels {
-      position: relative;
-      height: 20px;
-      margin-top: var(--space-2);
-    }
-    .chart-label {
+
+    .hero-stats::before {
+      content: '';
       position: absolute;
-      transform: translateX(-50%);
-      font-size: 10px;
-      color: var(--text-muted);
-      white-space: nowrap;
+      top: -20px;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
     }
-    .section-header {
-      padding: var(--space-4) var(--space-5);
-      border-bottom: 1px solid var(--border-subtle);
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
-    .section-title {
-      font-size: var(--text-xs);
+
+    .stat-icon {
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .stat-val {
+      font-size: var(--text-sm);
       font-weight: var(--weight-semibold);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
     }
-    .daily-detail-list { padding: var(--space-2) 0; }
-    .daily-detail-item {
+
+    .stat-lbl {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    .forecast-list {
+      padding: var(--space-8) var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .forecast-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: var(--space-3) var(--space-5);
-      transition: background var(--duration-fast) var(--ease-default);
+      padding: var(--space-2) 0;
     }
-    .daily-detail-item:hover { background: var(--bg-surface); }
-    .daily-detail-main {
+
+    .forecast-day {
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      width: 50px;
+    }
+
+    .forecast-condition {
       display: flex;
       align-items: center;
       gap: var(--space-3);
+      flex: 1;
+      justify-content: flex-start;
+      margin-left: var(--space-4);
     }
-    .daily-detail-day {
+
+    .forecast-cond-text {
       font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      color: var(--text-primary);
+      color: var(--text-secondary);
     }
-    .daily-detail-range {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-    }
-    .daily-detail-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .daily-detail-metrics {
-      display: flex;
-      gap: var(--space-4);
-    }
-    .detail-metric {
+
+    .forecast-temps {
       display: flex;
       align-items: center;
-      gap: var(--space-1);
-      font-size: var(--text-xs);
+      gap: var(--space-3);
+      width: 100px;
+      justify-content: flex-end;
+    }
+
+    .forecast-high {
+      font-size: var(--text-base);
+      font-weight: var(--weight-bold);
+    }
+
+    .forecast-low {
+      font-size: var(--text-sm);
       color: var(--text-muted);
     }
-    @media (max-width: 640px) {
-      .daily-detail-metrics { gap: var(--space-2); }
-    }
-  `],
+  `]
 })
 export class ForecastComponent {
   readonly weather = inject(WeatherStore);
   readonly settings = inject(SettingsStore);
-  readonly uvIndexLabel = uvIndexLabel;
-  readonly uvIndexColor = uvIndexColor;
+  readonly getWeatherMeta = getWeatherMeta;
 
-  readonly metrics: { id: ForecastMetric; label: string }[] = [
-    { id: 'temperature', label: 'Temperature' },
-    { id: 'precipitation', label: 'Precipitation' },
-    { id: 'wind', label: 'Wind' },
-    { id: 'humidity', label: 'Humidity' },
-    { id: 'uv', label: 'UV Index' },
-  ];
-
-  readonly selectedMetric = signal<ForecastMetric>('temperature');
-
-  /** Gets the next 24 hours of data for chart rendering */
-  readonly chartData = computed(() => {
-    const hourly = this.weather.next24Hours();
-    const metric = this.selectedMetric();
-
-    return hourly.map(h => {
-      let value: number;
-      switch (metric) {
-        case 'temperature': value = h.temperature; break;
-        case 'precipitation': value = h.precipitationProbability; break;
-        case 'wind': value = h.windSpeed; break;
-        case 'humidity': value = h.humidity; break;
-        case 'uv': value = h.uvIndex; break;
-      }
-      return { time: h.time, value };
-    });
+  readonly tomorrow = computed(() => {
+    const daily = this.weather.dailyForecast();
+    return daily.length > 1 ? daily[1] : daily[0];
   });
 
-  readonly chartPoints = computed(() => {
-    const data = this.chartData();
-    if (!data.length) return [];
-
-    const values = data.map(d => d.value);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-    const padding = 20;
-
-    return data.map((d, i) => ({
-      x: padding + (i / (data.length - 1)) * (800 - padding * 2),
-      y: padding + (1 - (d.value - min) / range) * (200 - padding * 2),
-      value: d.value,
-      label: new Date(d.time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
-    }));
+  readonly sevenDays = computed(() => {
+    return this.weather.dailyForecast();
   });
 
-  chartLinePath(): string {
-    const points = this.chartPoints();
-    if (points.length < 2) return '';
-    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  }
-
-  chartAreaPath(): string {
-    const points = this.chartPoints();
-    if (points.length < 2) return '';
-    const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    const last = points[points.length - 1];
-    const first = points[0];
-    return `${line} L ${last.x} 200 L ${first.x} 200 Z`;
-  }
-
-  formatDay(dateStr: string): string {
+  formatDayShort(dateStr: string): string {
     const date = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
   }
 }

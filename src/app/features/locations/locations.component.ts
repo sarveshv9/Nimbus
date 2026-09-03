@@ -1,120 +1,201 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { WeatherStore } from '../../core/state/weather.store';
 import { LocationStore } from '../../core/state/location.store';
-import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
+import { WeatherService } from '../../core/services/weather.service';
 import { GeoLocation, formatLocationName } from '../../core/models/location.model';
+import { CurrentWeather } from '../../core/models/weather.model';
+import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
+import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
 @Component({
   selector: 'nimbus-locations',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GlassCard],
+  imports: [RouterLink, WeatherIcon, TemperaturePipe],
   template: `
     <div class="locations-page">
-      <header class="page-header">
-        <h1 class="page-title font-display">Saved Locations</h1>
-        <p class="page-subtitle">Your favorite places</p>
-      </header>
+      <!-- Top Navigation -->
+      <nav class="top-nav">
+        <a routerLink="/" class="nav-btn" aria-label="Back">
+          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+        </a>
+        <div class="location-header">
+          <h1 class="page-title">Saved Locations</h1>
+        </div>
+        <div class="nav-btn" style="opacity: 0">
+          <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+        </div>
+      </nav>
 
-      @if (locationStore.hasSavedLocations()) {
-        <div class="locations-list">
-          @for (location of locationStore.savedLocations(); track location.id) {
-            <nimbus-glass-card>
-              <div class="location-item">
-                <button class="location-main" (click)="selectLocation(location)">
-                  <div class="location-info">
-                    <h3 class="location-name">{{ location.name }}</h3>
-                    <p class="location-region">{{ formatLocation(location) }}</p>
-                  </div>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round">
-                    <path d="m9 18 6-6-6-6"/>
-                  </svg>
-                </button>
-                <button
-                  class="remove-btn"
-                  (click)="removeLocation(location.id)"
-                  [attr.aria-label]="'Remove ' + location.name"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                  </svg>
+      <div class="page-content">
+        @if (locationStore.hasSavedLocations()) {
+          <div class="locations-list">
+            @for (location of locationStore.savedLocations(); track location.id) {
+              <div class="location-card" (click)="selectLocation(location)">
+                <div class="location-info">
+                  <h3 class="location-name">{{ location.name }}</h3>
+                  <p class="location-region">{{ formatLocation(location) }}</p>
+                </div>
+
+                <div class="weather-info">
+                  @if (locationWeather()[location.id]; as weather) {
+                    <div class="weather-temp font-display">{{ weather.temperature | temperature }}</div>
+                    <div class="weather-icon-wrapper">
+                      <nimbus-weather-icon [weatherCode]="weather.weatherCode" [isDay]="weather.isDay" [size]="48" />
+                    </div>
+                  } @else {
+                    <div class="loading-pulse"></div>
+                  }
+                </div>
+
+                <button class="remove-btn" (click)="removeLocation($event, location.id)" aria-label="Remove location">
+                  <i class="ph ph-x" style="font-size: 14px;"></i>
                 </button>
               </div>
-            </nimbus-glass-card>
-          }
-        </div>
-      } @else {
-        <nimbus-glass-card>
+            }
+          </div>
+        } @else {
           <div class="empty-state">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-            </svg>
+            <i class="ph ph-map-pin" style="font-size: 48px; color: var(--text-muted); opacity: 0.5;"></i>
             <h3>No saved locations yet</h3>
             <p>Search for a city and save it to quickly access its weather.</p>
+            <a routerLink="/explore" class="search-btn">Search Now</a>
           </div>
-        </nimbus-glass-card>
-      }
+        }
+      </div>
     </div>
   `,
   styles: [`
     .locations-page {
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
-      animation: fadeInUp var(--duration-slow) var(--ease-decel);
+      min-height: 100vh;
+      background: var(--bg-primary); /* Deep dark background */
+      color: var(--text-primary);
+      animation: fadeIn var(--duration-normal) var(--ease-decel);
     }
-    .page-header { padding: var(--space-4) 0; }
-    .page-title { font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--text-primary); }
-    .page-subtitle { font-size: var(--text-base); color: var(--text-muted); margin-top: var(--space-1); }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-6);
+    }
+
+    .nav-btn {
+      color: #FFFFFF;
+      opacity: 0.9;
+      padding: var(--space-2);
+      cursor: pointer;
+    }
+
+    .page-title {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+    }
+
+    .page-content {
+      padding: 0 var(--space-6) var(--space-8) var(--space-6);
+    }
 
     .locations-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
+      gap: var(--space-4);
     }
-    .location-item {
+
+    .location-card {
+      position: relative;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-5) var(--space-6);
       display: flex;
-      align-items: center;
-      gap: var(--space-3);
-    }
-    .location-main {
-      display: flex;
-      align-items: center;
       justify-content: space-between;
-      flex: 1;
-      gap: var(--space-3);
-      padding: 0;
-      background: transparent;
-      border: none;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       cursor: pointer;
-      text-align: left;
-      color: inherit;
+      overflow: hidden;
+      transition: transform var(--duration-fast) var(--ease-default);
     }
+
+    .location-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .location-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 1;
+    }
+
     .location-name {
-      font-size: var(--text-base);
-      font-weight: var(--weight-semibold);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
       color: var(--text-primary);
+      margin: 0;
     }
+
     .location-region {
       font-size: var(--text-sm);
       color: var(--text-muted);
-      margin-top: 2px;
+      margin: 0;
     }
+
+    .weather-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      z-index: 1;
+      padding-right: var(--space-6); /* Make room for remove button */
+    }
+
+    .weather-temp {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+    }
+
+    .weather-icon-wrapper {
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    }
+
     .remove-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-md);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
       color: var(--text-muted);
+      border: none;
+      cursor: pointer;
       transition: all var(--duration-fast) var(--ease-default);
-      flex-shrink: 0;
+      z-index: 10;
     }
+
     .remove-btn:hover {
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.2);
       color: var(--danger);
     }
+
+    .loading-pulse {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -122,9 +203,9 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       gap: var(--space-3);
       text-align: center;
       padding: var(--space-12);
+      margin-top: var(--space-8);
     }
     .empty-state h3 {
-      font-family: var(--font-display);
       font-size: var(--text-xl);
       font-weight: var(--weight-semibold);
       color: var(--text-primary);
@@ -134,20 +215,60 @@ import { GeoLocation, formatLocationName } from '../../core/models/location.mode
       color: var(--text-muted);
       max-width: 300px;
     }
+    .search-btn {
+      margin-top: var(--space-4);
+      padding: var(--space-3) var(--space-6);
+      background-color: var(--accent);
+      color: var(--bg-primary);
+      border-radius: var(--radius-full);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: var(--text-xs);
+      text-decoration: none;
+    }
   `],
 })
-export class LocationsComponent {
+export class LocationsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly weatherStore = inject(WeatherStore);
+  private readonly weatherService = inject(WeatherService);
   readonly locationStore = inject(LocationStore);
   readonly formatLocation = formatLocationName;
+
+  readonly locationWeather = signal<Record<number, CurrentWeather>>({});
+
+  ngOnInit() {
+    this.fetchWeatherForSavedLocations();
+  }
+
+  private fetchWeatherForSavedLocations() {
+    const saved = this.locationStore.savedLocations();
+    saved.forEach(location => {
+      this.weatherService.fetchCurrentWeatherOnly(location.latitude, location.longitude)
+        .subscribe(weather => {
+          this.locationWeather.update(current => ({
+            ...current,
+            [location.id]: weather
+          }));
+        });
+    });
+  }
 
   selectLocation(location: GeoLocation): void {
     this.weatherStore.loadWeather(location);
     this.router.navigate(['/']);
   }
 
-  removeLocation(locationId: number): void {
+  removeLocation(event: Event, locationId: number): void {
+    event.stopPropagation();
     this.locationStore.removeLocation(locationId);
+    
+    // Remove weather entry for the deleted location
+    this.locationWeather.update(current => {
+      const updated = { ...current };
+      delete updated[locationId];
+      return updated;
+    });
   }
 }

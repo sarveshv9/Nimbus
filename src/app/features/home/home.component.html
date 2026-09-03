@@ -1,311 +1,147 @@
 @if (weather.isLoading() && !weather.hasData()) {
-  <!-- Loading skeleton -->
-  <div class="home-loading">
-    <div class="hero-skeleton">
-      <nimbus-skeleton width="140px" height="16px" />
-      <nimbus-skeleton width="200px" height="14px" />
-      <nimbus-skeleton width="120px" height="80px" radius="var(--radius-lg)" />
-      <nimbus-skeleton width="80px" height="14px" />
+  <div class="home-page">
+    <div class="hero-blue-card">
+      <header class="top-nav">
+        <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+        <div class="location-header">
+          <nimbus-skeleton width="120px" height="24px" class="mb-1" />
+          <nimbus-skeleton width="80px" height="16px" radius="full" />
+        </div>
+        <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+      </header>
+
+      <div class="hero-weather">
+        <div class="hero-icon-container">
+          <nimbus-skeleton width="140px" height="140px" radius="full" />
+        </div>
+        <div class="hero-temp-container" style="margin-top: 16px;">
+          <nimbus-skeleton width="120px" height="80px" />
+        </div>
+        <nimbus-skeleton width="160px" height="32px" class="mb-1" />
+        <nimbus-skeleton width="120px" height="20px" />
+      </div>
+
+      <div class="hero-stats" style="margin-top: auto;">
+        <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+        <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+        <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+      </div>
     </div>
-    <nimbus-glass-card>
-      <nimbus-skeleton width="100%" height="80px" />
-    </nimbus-glass-card>
-    <div class="stats-grid">
-      <nimbus-glass-card variant="compact">
-        <nimbus-skeleton width="100%" height="60px" />
-      </nimbus-glass-card>
-      <nimbus-glass-card variant="compact">
-        <nimbus-skeleton width="100%" height="60px" />
-      </nimbus-glass-card>
-      <nimbus-glass-card variant="compact">
-        <nimbus-skeleton width="100%" height="60px" />
-      </nimbus-glass-card>
+    
+    <div class="home-bottom">
+      <div class="timeline-header">
+        <nimbus-skeleton width="80px" height="24px" />
+        <nimbus-skeleton width="60px" height="20px" />
+      </div>
+      <div class="timeline-items" style="overflow: hidden; justify-content: space-between;">
+        <nimbus-skeleton width="64px" height="100px" radius="full" />
+        <nimbus-skeleton width="64px" height="100px" radius="full" />
+        <nimbus-skeleton width="64px" height="100px" radius="full" />
+        <nimbus-skeleton width="64px" height="100px" radius="full" />
+      </div>
     </div>
   </div>
 } @else if (weather.error()) {
-  <!-- Error state -->
   <div class="error-state">
-    <nimbus-glass-card>
-      <div class="error-content">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-linecap="round">
-          <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-        </svg>
-        <h2>{{ weather.error()?.message }}</h2>
-        <p class="error-hint">Try searching for a different location or check your connection.</p>
-      </div>
-    </nimbus-glass-card>
+    <div class="hero-blue-card">
+      <i class="ph ph-warning-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+      <p class="error-message">{{ weather.error() || 'Failed to load weather data' }}</p>
+      <button class="retry-btn" (click)="weather.loadWeather(weather.selectedLocation()!)">Try Again</button>
+    </div>
   </div>
-} @else if (weather.hasData()) {
-  <!-- Main weather content -->
-  <div class="home-content">
-    <!-- Hero Section -->
-    <section class="hero" aria-label="Current weather">
-      <div class="hero-location">
-        <h1 class="location-name">{{ locationName }}</h1>
-        <p class="location-region">{{ locationRegion }}</p>
-        <p class="location-date">{{ currentDate }}</p>
-      </div>
-
-      <div class="hero-temp">
-        <span class="temp-value font-display">
-          {{ weather.currentWeather()?.temperature | temperature }}
-        </span>
-      </div>
-
-      <div class="hero-condition">
-        <nimbus-weather-icon
-          [weatherCode]="weather.currentWeather()?.weatherCode ?? 0"
-          [isDay]="weather.currentWeather()?.isDay ?? true"
-          [size]="56"
-        />
-        <div class="condition-info">
-          <span class="condition-label">{{ weather.conditionLabel() }}</span>
-          <span class="feels-like">
-            Feels like {{ weather.currentWeather()?.feelsLike | temperature }}
-          </span>
-        </div>
-      </div>
-
-      @if (weather.todayHighLow(); as highLow) {
-        <div class="hero-range">
-          <span class="range-high">H:{{ highLow.high | temperature }}</span>
-          <span class="range-divider">·</span>
-          <span class="range-low">L:{{ highLow.low | temperature }}</span>
-        </div>
-      }
-    </section>
-
-    <!-- Hourly Forecast -->
-    <section aria-label="Hourly forecast">
-      <nimbus-glass-card variant="flush">
-        <div class="section-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <h2 class="section-title">Hourly Forecast</h2>
-        </div>
-        <div class="hourly-scroll" role="list" aria-label="Hourly weather forecast">
-          @for (hour of weather.next24Hours(); track hour.time) {
-            <div class="hourly-item" role="listitem">
-              <span class="hourly-time">{{ formatHour(hour.time) }}</span>
-              <nimbus-weather-icon [weatherCode]="hour.weatherCode" [isDay]="hour.isDay" [size]="28" />
-              <span class="hourly-temp">{{ hour.temperature | temperature }}</span>
-              @if (hour.precipitationProbability > 0) {
-                <span class="hourly-precip">{{ hour.precipitationProbability }}%</span>
-              }
-            </div>
-          }
-        </div>
-      </nimbus-glass-card>
-    </section>
-
-    <!-- Weather Stats Grid -->
-    <section class="stats-grid" aria-label="Weather details">
-      <!-- Wind -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
-            </svg>
-            <span class="stat-label">Wind</span>
+} @else {
+  <div class="home-page">
+    <!-- Top Blue Card -->
+    <div class="hero-blue-card">
+      <header class="top-nav">
+        <button class="nav-btn" routerLink="/locations" aria-label="Locations">
+          <i class="ph ph-list" style="font-size: 28px;"></i>
+        </button>
+        <div class="location-header">
+          <div class="location-title">
+            <i class="ph-fill ph-map-pin" style="font-size: 20px;"></i>
+            <span>{{ locationName }}</span>
           </div>
-          <div class="stat-value">{{ weather.currentWeather()?.windSpeed | windSpeed }}</div>
-          <div class="stat-detail">
-            <span class="wind-direction">
-              {{ windDirectionLabel(weather.currentWeather()?.windDirection ?? 0) }}
-            </span>
-            <svg class="wind-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                 [style.transform]="'rotate(' + (weather.currentWeather()?.windDirection ?? 0) + 'deg)'">
-              <path d="M12 2v20"/><path d="m5 9 7-7 7 7"/>
-            </svg>
+          <div class="location-updating">
+            <span class="dot"></span> Updating
           </div>
-          <div class="stat-sub">Gusts {{ weather.currentWeather()?.windGusts | windSpeed }}</div>
         </div>
-      </nimbus-glass-card>
+        <button class="nav-btn" routerLink="/settings" aria-label="Settings">
+          <i class="ph ph-gear" style="font-size: 28px;"></i>
+        </button>
+      </header>
 
-      <!-- Humidity -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
-            </svg>
-            <span class="stat-label">Humidity</span>
-          </div>
-          <div class="stat-value">{{ weather.currentWeather()?.humidity }}%</div>
-          <div class="stat-bar">
-            <div class="stat-bar-fill" [style.width.%]="weather.currentWeather()?.humidity ?? 0"></div>
-          </div>
-          <div class="stat-sub">Dew point {{ weather.currentWeather()?.feelsLike | temperature }}</div>
+      <!-- Hero Weather — Editorial Typography -->
+      <div class="hero-weather" routerLink="/details" role="button" tabindex="0" aria-label="View detailed weather information">
+        <div class="hero-icon-container">
+          <nimbus-weather-icon [weatherCode]="weather.currentWeather()?.weatherCode ?? 0" [size]="72" [isDay]="weather.currentWeather()?.isDay ?? true" />
         </div>
-      </nimbus-glass-card>
 
-      <!-- UV Index -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-            </svg>
-            <span class="stat-label">UV Index</span>
-          </div>
-          <div class="stat-value">{{ weather.currentWeather()?.uvIndex ?? 0 }}</div>
-          <div class="stat-detail" [style.color]="uvIndexColor(weather.currentWeather()?.uvIndex ?? 0)">
-            {{ uvIndexLabel(weather.currentWeather()?.uvIndex ?? 0) }}
-          </div>
-          <div class="uv-scale">
-            @for (i of [0,1,2,3,4,5,6,7,8,9,10]; track i) {
-              <div
-                class="uv-segment"
-                [class.active]="i <= (weather.currentWeather()?.uvIndex ?? 0)"
-                [style.background]="i <= (weather.currentWeather()?.uvIndex ?? 0) ? uvIndexColor(i) : 'var(--border-subtle)'"
-              ></div>
+        @if (settings.swearyLabels()) {
+          <h1 class="hero-headline">
+            @for (line of getSwearyLabel(weather.currentWeather()?.weatherCode).headline.split('\n'); track $index) {
+              @if ($index > 0) { <br> }
+              <span [class.hero-accent]="line.trim() === getSwearyLabel(weather.currentWeather()?.weatherCode).accent">{{ line }}</span>
             }
-          </div>
-        </div>
-      </nimbus-glass-card>
-
-      <!-- Visibility -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>
-            </svg>
-            <span class="stat-label">Visibility</span>
-          </div>
-          <div class="stat-value">{{ ((weather.currentWeather()?.visibility ?? 0) / 1000).toFixed(0) }} km</div>
-          <div class="stat-detail">{{ visibilityLabel(weather.currentWeather()?.visibility ?? 0) }}</div>
-        </div>
-      </nimbus-glass-card>
-
-      <!-- Pressure -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/>
-            </svg>
-            <span class="stat-label">Pressure</span>
-          </div>
-          <div class="stat-value">{{ weather.currentWeather()?.pressure }} hPa</div>
-        </div>
-      </nimbus-glass-card>
-
-      <!-- Cloud Cover -->
-      <nimbus-glass-card variant="compact">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-            </svg>
-            <span class="stat-label">Cloud Cover</span>
-          </div>
-          <div class="stat-value">{{ weather.currentWeather()?.cloudCover }}%</div>
-          <div class="stat-bar">
-            <div class="stat-bar-fill" [style.width.%]="weather.currentWeather()?.cloudCover ?? 0"></div>
-          </div>
-        </div>
-      </nimbus-glass-card>
-    </section>
-
-    <!-- Sunrise/Sunset Timeline -->
-    <section aria-label="Sunrise and sunset">
-      <nimbus-glass-card>
-        <div class="section-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>
-          </svg>
-          <h2 class="section-title">Sunrise & Sunset</h2>
-        </div>
-        <div class="sun-timeline">
-          <div class="sun-labels">
-            <span class="sun-time">{{ formatSunTime(weather.todaySunrise()) }}</span>
-            <span class="sun-time">{{ formatSunTime(weather.todaySunset()) }}</span>
-          </div>
-          <div class="sun-arc">
-            <svg viewBox="0 0 300 80" preserveAspectRatio="none" class="arc-svg" aria-hidden="true">
-              <path d="M 10 70 Q 150 -10 290 70" fill="none" stroke="var(--border-default)" stroke-width="2" stroke-dasharray="4 4" />
-              <path d="M 10 70 Q 150 -10 290 70" fill="none" stroke="var(--accent)" stroke-width="2.5"
-                    [attr.stroke-dasharray]="'280'"
-                    [attr.stroke-dashoffset]="280 - (280 * sunPosition)"
-                    style="transition: stroke-dashoffset 1s ease" />
-              <circle
-                [attr.cx]="10 + (280 * sunPosition)"
-                [attr.cy]="70 - (Math.sin(sunPosition * Math.PI) * 80)"
-                r="6" fill="var(--accent)"
-                style="transition: cx 1s ease, cy 1s ease; filter: drop-shadow(0 0 6px var(--accent))"
-              />
-            </svg>
-          </div>
-          <div class="sun-labels">
-            <span class="sun-label">Sunrise</span>
-            <span class="sun-label">Sunset</span>
-          </div>
-        </div>
-      </nimbus-glass-card>
-    </section>
-
-    <!-- 7-Day Forecast -->
-    <section aria-label="7-day forecast">
-      <nimbus-glass-card variant="flush">
-        <div class="section-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
-          </svg>
-          <h2 class="section-title">7-Day Forecast</h2>
-        </div>
-        <div class="daily-list" role="list" aria-label="Daily weather forecast">
-          @for (day of weather.dailyForecast(); track day.date) {
-            <div class="daily-item" role="listitem">
-              <span class="daily-day">{{ formatDay(day.date) }}</span>
-              <nimbus-weather-icon [weatherCode]="day.weatherCode" [size]="24" />
-              @if (day.precipitationProbabilityMax > 20) {
-                <span class="daily-precip">{{ day.precipitationProbabilityMax }}%</span>
-              } @else {
-                <span class="daily-precip-spacer"></span>
-              }
-              <span class="daily-low">{{ day.tempMin | temperature }}</span>
-              <div class="daily-bar-container">
-                <div
-                  class="daily-bar"
-                  [style.left]="tempBarStyle(day.tempMin, day.tempMax).left"
-                  [style.width]="tempBarStyle(day.tempMin, day.tempMax).width"
-                ></div>
-              </div>
-              <span class="daily-high">{{ day.tempMax | temperature }}</span>
-            </div>
-          }
-        </div>
-      </nimbus-glass-card>
-    </section>
-
-    <!-- Air Quality (deferred — secondary content) -->
-    @defer (on viewport) {
-      @if (weather.airQuality(); as aq) {
-        @if (aq.usAqi !== null) {
-          <section aria-label="Air quality">
-            <nimbus-glass-card>
-              <div class="section-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-                </svg>
-                <h2 class="section-title">Air Quality</h2>
-              </div>
-              <div class="aqi-display">
-                <div class="aqi-value">{{ aq.usAqi }}</div>
-                <div class="aqi-label">US AQI</div>
-                @if (aq.pm25 !== null) {
-                  <div class="aqi-detail">PM2.5: {{ aq.pm25 }} μg/m³</div>
-                }
-              </div>
-            </nimbus-glass-card>
-          </section>
+          </h1>
+          <p class="hero-subtitle">{{ getSwearyLabel(weather.currentWeather()?.weatherCode).subtitle }}</p>
+        } @else {
+          <h1 class="hero-headline">
+            <span>It's</span><br>
+            <span class="hero-accent">{{ weather.currentWeather()?.temperature | temperature:'value' }}°</span><br>
+            <span>{{ getWeatherMeta(weather.currentWeather()?.weatherCode).label | lowercase }}.</span>
+          </h1>
+          <p class="hero-subtitle">{{ currentDate }}</p>
         }
-      }
-    } @placeholder {
-      <div style="height: 1px;"></div>
-    }
+
+        <div class="hero-divider"></div>
+
+        <div class="hero-bottom-bar">
+          <div class="hero-bottom-info">
+            <span class="hero-bottom-label">Be prepared<br>for the weather</span>
+          </div>
+          <div class="hero-bottom-time">
+            <span class="hero-time-value">{{ currentTime }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Stats -->
+      <div class="hero-stats" routerLink="/details" role="button" tabindex="0" aria-label="Click to view detailed weather metrics">
+        <div class="hero-stat">
+          <i class="ph ph-wind stat-icon" style="font-size: 24px;"></i>
+          <span class="stat-val">{{ weather.currentWeather()?.windSpeed | windSpeed }}</span>
+          <span class="stat-lbl">Wind</span>
+        </div>
+        <div class="hero-stat">
+          <i class="ph ph-drop stat-icon" style="font-size: 24px;"></i>
+          <span class="stat-val">{{ weather.currentWeather()?.humidity }}%</span>
+          <span class="stat-lbl">Humidity</span>
+        </div>
+        <div class="hero-stat">
+          <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
+          <span class="stat-val">{{ weather.next24Hours()[0]?.precipitationProbability ?? 0 }}%</span>
+          <span class="stat-lbl">Chance of rain</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dark Section -->
+    <div class="home-bottom">
+      <div class="timeline-header">
+        <h2 class="timeline-title">Today</h2>
+        <a routerLink="/forecast" class="timeline-link">7 days ></a>
+      </div>
+      
+      <div class="timeline-items">
+        @for (hour of weather.next24Hours(); track hour.time; let i = $index) {
+          <div class="timeline-item" [class.active]="i === 0">
+            <span class="timeline-temp">{{ hour.temperature | temperature }}</span>
+            <nimbus-weather-icon [weatherCode]="hour.weatherCode" [size]="28" [isDay]="hour.isDay" />
+            <span class="timeline-time">{{ formatHour(hour.time) }}</span>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 }
