@@ -10,30 +10,31 @@ import { WeatherService } from '../../core/services/weather.service';
 import { GeoLocation, formatLocationName } from '../../core/models/location.model';
 import { CurrentWeather, getWeatherMeta } from '../../core/models/weather.model';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
+import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
 interface LocationWeatherState {
-  weather?: CurrentWeather;
+  weather?: CurrentWeather & { tempMax?: number, tempMin?: number };
   error?: boolean;
 }
 
 @Component({
   selector: 'nimbus-locations',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CommonModule, FormsModule, DragDropModule, WeatherIcon, TemperaturePipe, DatePipe],
+  imports: [RouterLink, CommonModule, FormsModule, DragDropModule, WeatherIcon, TemperaturePipe, DatePipe, GlassCard],
   template: `
     <div class="locations-page">
       <!-- Top Navigation -->
-      <div [class]="'hero-theme-card hero-theme-card--' + weatherStore.weatherTheme()" style="padding-top: var(--space-4); padding-bottom: var(--space-4);">
+      <div class="glass-header" style="padding-top: var(--space-4); padding-bottom: var(--space-4);">
         <nav class="top-nav">
           <a routerLink="/" class="nav-btn" aria-label="Back">
-            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            <i class="ph-bold ph-caret-left" style="font-size: 28px;"></i>
           </a>
           <div class="location-header">
             <h1 class="page-title">Saved Locations</h1>
           </div>
-          <button class="nav-btn" (click)="refreshAll()" aria-label="Refresh all">
-            <i class="ph ph-arrows-clockwise" [class.spin]="isRefreshing()" style="font-size: 24px;"></i>
+          <button class="nav-btn" (click)="refreshAll()" aria-label="Refresh all" [class.is-loading]="isRefreshing()">
+            <i class="ph-bold ph-arrows-clockwise" [class.spin]="isRefreshing()" style="font-size: 24px;"></i>
           </button>
         </nav>
         
@@ -59,7 +60,7 @@ interface LocationWeatherState {
         }
 
         @if (showUndoToast()) {
-          <div class="toast-notification">
+          <div class="toast-notification" aria-live="polite">
             <span>Location removed</span>
             <button class="undo-btn" (click)="undoRemove()">Undo</button>
           </div>
@@ -77,55 +78,66 @@ interface LocationWeatherState {
                  [cdkDropListData]="filteredLocations()"
                  (cdkDropListDropped)="drop($event)">
               @for (location of filteredLocations(); track location.id) {
-                <div class="location-card" cdkDrag (click)="selectLocation(location)" [class.swiped]="swipedLocationId() === location.id">
+                <nimbus-glass-card variant="flush" class="location-card" cdkDrag [class.swiped]="swipedLocationId() === location.id">
                   
                   <div class="card-content-wrapper" 
                        (touchstart)="onTouchStart($event, location.id)"
                        (touchmove)="onTouchMove($event)"
-                       (touchend)="onTouchEnd()">
+                       (touchend)="onTouchEnd()"
+                       [attr.aria-label]="getAriaLabel(location)">
                     
-                    <div class="drag-handle" cdkDragHandle (click)="$event.stopPropagation()">
-                      <i class="ph ph-dots-six-vertical"></i>
+                    <div class="drag-handle" (click)="$event.stopPropagation()">
+                      <button class="reorder-btn" (click)="moveUp(location, $index)" aria-label="Move up" [disabled]="$index === 0"><i class="ph ph-caret-up"></i></button>
+                      <i class="ph ph-dots-six-vertical" cdkDragHandle style="cursor: grab; padding: 4px;"></i>
+                      <button class="reorder-btn" (click)="moveDown(location, $index)" aria-label="Move down" [disabled]="$index === filteredLocations().length - 1"><i class="ph ph-caret-down"></i></button>
                     </div>
 
-                    <div class="location-info">
-                      <div class="location-title-row">
-                        <h3 class="location-name">{{ location.name }}</h3>
-                        @if (isCurrentActive(location.id)) {
-                          <i class="ph-fill ph-map-pin active-indicator" title="Currently viewing"></i>
+                    <div class="card-clickable-area" (click)="selectLocation(location)">
+                      <div class="location-info">
+                        <div class="location-title-row">
+                          <h3 class="location-name">{{ location.name }}</h3>
+                          @if (isCurrentActive(location.id)) {
+                            <i class="ph-fill ph-map-pin active-indicator" title="Currently viewing"></i>
+                          }
+                        </div>
+                        <p class="location-region">{{ formatLocation(location) }}</p>
+                      </div>
+
+                      <div class="weather-info">
+                        @if (locationWeather()[location.id]?.weather; as weather) {
+                          <div class="weather-metrics">
+                            <span class="weather-temp font-display">{{ weather.temperature | temperature }}</span>
+                            <span class="weather-condition">{{ getWeatherMeta(weather.weatherCode).label }}</span>
+                            @if (weather.tempMax !== undefined && weather.tempMin !== undefined) {
+                              <span class="weather-high-low">H: {{ weather.tempMax | temperature }} L: {{ weather.tempMin | temperature }}</span>
+                            }
+                          </div>
+                          <nimbus-weather-icon [weatherCode]="weather.weatherCode" [isDay]="weather.isDay" [size]="48" />
+                        } @else if (locationWeather()[location.id]?.error) {
+                          <div class="error-state" (click)="$event.stopPropagation(); retryLocation(location)">
+                            <i class="ph ph-warning-circle text-danger"></i>
+                            <span class="retry-text">Unavailable - Retry</span>
+                          </div>
+                        } @else {
+                          <div class="loading-pulse-small"></div>
                         }
                       </div>
-                      <p class="location-region">{{ formatLocation(location) }}</p>
-                    </div>
-
-                    <div class="weather-info">
-                      @if (locationWeather()[location.id]?.weather; as weather) {
-                        <div class="weather-metrics">
-                          <span class="weather-temp font-display">{{ weather.temperature | temperature }}</span>
-                          <span class="weather-condition">{{ getWeatherMeta(weather.weatherCode).label }}</span>
-                        </div>
-                        <nimbus-weather-icon [weatherCode]="weather.weatherCode" [isDay]="weather.isDay" [size]="48" />
-                      } @else if (locationWeather()[location.id]?.error) {
-                        <div class="error-state" (click)="$event.stopPropagation(); retryLocation(location)">
-                          <i class="ph ph-warning-circle text-danger"></i>
-                          <span class="retry-text">Retry</span>
-                        </div>
-                      } @else {
-                        <div class="loading-pulse-small"></div>
-                      }
                     </div>
                   </div>
 
-                  <!-- Swipe actions hidden underneath -->
                   <div class="swipe-actions">
-                    <button class="action-btn set-home-btn" (click)="$event.stopPropagation(); setHome(location.id)">
+                    <button class="action-btn set-home-btn" (click)="$event.stopPropagation(); setHome(location.id)" aria-label="Set as home">
                       <i class="ph ph-house"></i>
                     </button>
-                    <button class="action-btn delete-btn" (click)="$event.stopPropagation(); removeLocation(location)">
-                      <i class="ph ph-trash"></i>
+                    <button class="action-btn delete-btn" (click)="$event.stopPropagation(); confirmRemove(location)" [attr.aria-label]="pendingDeleteId() === location.id ? 'Confirm delete' : 'Delete location'">
+                      @if (pendingDeleteId() === location.id) {
+                        <span style="font-size: 14px; font-weight: bold; padding: 0 4px;">Confirm?</span>
+                      } @else {
+                        <i class="ph ph-trash"></i>
+                      }
                     </button>
                   </div>
-                </div>
+                </nimbus-glass-card>
               }
               
               @if (filteredLocations().length === 0) {
@@ -135,7 +147,7 @@ interface LocationWeatherState {
           }
         } @else {
           <div class="empty-state">
-            <i class="ph ph-map-pin" style="font-size: 48px; color: var(--text-muted); opacity: 0.5;"></i>
+            <nimbus-weather-icon [weatherCode]="0" [isDay]="true" [size]="120" style="margin-bottom: var(--space-4);" />
             <h3>No saved locations yet</h3>
             <p>Search for a city and save it to quickly access its weather.</p>
             <a routerLink="/explore" class="search-btn">Search Now</a>
@@ -149,10 +161,17 @@ interface LocationWeatherState {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-surface);
+      background: transparent;
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
       overflow-x: hidden;
+    }
+
+    .glass-header {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .top-nav {
@@ -170,6 +189,11 @@ interface LocationWeatherState {
       cursor: pointer;
       background: transparent;
       border: none;
+      transition: opacity 0.3s ease;
+    }
+    .nav-btn.is-loading {
+      opacity: 0.4;
+      pointer-events: none;
     }
     
     .spin {
@@ -263,13 +287,19 @@ interface LocationWeatherState {
 
     .card-content-wrapper {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       padding: var(--space-4);
-      background: var(--bg-card);
+      background: transparent;
       position: relative;
       z-index: 2;
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .card-clickable-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex: 1;
       cursor: pointer;
     }
     
@@ -278,14 +308,29 @@ interface LocationWeatherState {
     }
 
     .drag-handle {
-      cursor: grab;
-      padding: var(--space-2);
-      margin-left: -8px;
-      margin-right: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 8px 0 0;
       color: var(--text-muted);
       font-size: 20px;
     }
-    .drag-handle:active {
+    
+    .reorder-btn {
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      min-height: 32px;
+    }
+    .reorder-btn:disabled { opacity: 0.3; cursor: default; }
+    
+    .drag-handle:active i[cdkDragHandle] {
       cursor: grabbing;
     }
 
@@ -303,7 +348,7 @@ interface LocationWeatherState {
     }
 
     .location-name {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--text-primary);
       margin: 0;
@@ -336,7 +381,7 @@ interface LocationWeatherState {
 
     .weather-temp {
       font-family: 'Inter', -apple-system, sans-serif;
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 900;
       color: var(--text-primary);
       letter-spacing: -1.5px;
@@ -347,6 +392,13 @@ interface LocationWeatherState {
       font-size: 11px;
       color: var(--text-secondary);
       font-weight: 600;
+    }
+    
+    .weather-high-low {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
     }
 
     .error-state {
@@ -392,6 +444,8 @@ interface LocationWeatherState {
       font-size: 24px;
       color: #FFF;
       cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
     }
     .set-home-btn { background: var(--warning); }
     .delete-btn { background: var(--danger); }
@@ -423,18 +477,14 @@ interface LocationWeatherState {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       text-align: center;
       padding: var(--space-12) var(--space-6);
       color: var(--text-secondary);
-      height: 50vh;
+      margin-top: var(--space-12);
     }
 
-    .empty-state i {
-      font-size: 64px;
-      margin-bottom: var(--space-6);
-      opacity: 0.3;
-    }
+
 
     .empty-state h3 {
       font-size: 24px;
@@ -450,15 +500,20 @@ interface LocationWeatherState {
     }
 
     .search-btn {
-      background: var(--accent);
+      background: var(--gradient-blue);
       color: #fff;
       border: none;
-      border-radius: var(--radius-full);
-      padding: var(--space-3) var(--space-8);
-      font-size: 14px;
-      font-weight: 700;
+      border-radius: 30px;
+      padding: var(--space-3) var(--space-10);
+      font-size: 15px;
+      font-weight: 800;
       text-decoration: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 16px rgba(33, 133, 255, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .search-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 8px rgba(33, 133, 255, 0.3);
     }
 
     /* Toast */
@@ -515,10 +570,11 @@ export class LocationsComponent implements OnInit {
   private touchStartX = 0;
   private currentTouchId: number | null = null;
   
-  // Undo State
+  // Undo / Confirm Delete State
   readonly showUndoToast = signal(false);
   private pendingRemoval: GeoLocation | null = null;
   private undoTimeout: any;
+  readonly pendingDeleteId = signal<number | null>(null);
 
   readonly filteredLocations = computed(() => {
     const query = this.searchQuery().toLowerCase();
@@ -598,6 +654,20 @@ export class LocationsComponent implements OnInit {
     }
   }
 
+  confirmRemove(location: GeoLocation): void {
+    if (this.pendingDeleteId() !== location.id) {
+      this.pendingDeleteId.set(location.id);
+      setTimeout(() => {
+        if (this.pendingDeleteId() === location.id) {
+          this.pendingDeleteId.set(null); // auto cancel after 3s
+        }
+      }, 3000);
+    } else {
+      this.pendingDeleteId.set(null);
+      this.removeLocation(location);
+    }
+  }
+
   removeLocation(location: GeoLocation): void {
     this.swipedLocationId.set(null);
     this.pendingRemoval = location;
@@ -641,5 +711,28 @@ export class LocationsComponent implements OnInit {
 
   onTouchEnd() {
     this.currentTouchId = null;
+  }
+  
+  moveUp(location: GeoLocation, index: number) {
+    if (index > 0) {
+      this.locationStore.reorderLocations(index, index - 1);
+    }
+  }
+  
+  moveDown(location: GeoLocation, index: number) {
+    const max = this.filteredLocations().length - 1;
+    if (index < max) {
+      this.locationStore.reorderLocations(index, index + 1);
+    }
+  }
+  
+  getAriaLabel(location: GeoLocation): string {
+    const weather = this.locationWeather()[location.id]?.weather;
+    if (weather) {
+      const temp = weather.temperature.toFixed(0) + ' degrees';
+      const cond = this.getWeatherMeta(weather.weatherCode).label;
+      return `${location.name}. ${temp}, ${cond}.`;
+    }
+    return location.name;
   }
 }

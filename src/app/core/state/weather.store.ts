@@ -38,6 +38,8 @@ export class WeatherStore {
   readonly error = signal<WeatherError | null>(null);
   readonly syncError = signal<string | null>(null);
   readonly lastUpdated = signal<Date | null>(null);
+  readonly lastFetchedAt = signal<Date | null>(null);
+  readonly isShowingCachedData = signal(false);
   private autoRefreshInterval: any;
 
   // === DERIVED STATE (computed signals) ===
@@ -161,6 +163,8 @@ export class WeatherStore {
     this.error.set(null);
     this.syncError.set(null);
 
+    this.lastFetchedAt.set(new Date());
+
     const cacheKey = `nimbus-weather-${location.latitude.toFixed(4)}-${location.longitude.toFixed(4)}`;
     const cached = this.storage.get<WeatherData>(cacheKey);
     if (cached) {
@@ -169,6 +173,9 @@ export class WeatherStore {
       this.dailyForecast.set(cached.daily);
       if (cached.minutely15) this.minutelyForecast.set(cached.minutely15);
       this.airQuality.set(cached.airQuality);
+      this.isShowingCachedData.set(true);
+    } else {
+      this.isShowingCachedData.set(false);
     }
 
     if (this.fetchSubscription) {
@@ -187,13 +194,16 @@ export class WeatherStore {
           this.storage.set(cacheKey, data);
           this.lastUpdated.set(new Date());
           this.isLoading.set(false);
+          this.isShowingCachedData.set(false);
           this.startAutoRefresh();
         },
         error: (err: WeatherError) => {
           if (!cached) {
             this.error.set(err);
+            this.isShowingCachedData.set(false);
           } else {
             this.syncError.set('Background sync failed. Showing cached data.');
+            this.isShowingCachedData.set(true);
           }
           this.isLoading.set(false);
         },

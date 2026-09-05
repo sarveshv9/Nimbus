@@ -18,7 +18,7 @@
   max-height: 896px;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background: transparent;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
 }
 

@@ -1,5 +1,6 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { WeatherTheme } from '../../core/models/weather.model';
+import { SettingsStore } from '../../core/state/settings.store';
 
 /**
  * Animated weather effects overlay layer.
@@ -14,7 +15,8 @@ import { WeatherTheme } from '../../core/models/weather.model';
       <!-- Atmospheric gradient background -->
       <div class="atmosphere"></div>
 
-      <!-- Rain effect -->
+      @if (!settings.reducedMotion()) {
+        <!-- Rain effect -->
       @if (weatherTheme() === 'rain' || weatherTheme() === 'storm') {
         <div class="rain-container" aria-hidden="true">
           @for (drop of rainDrops; track drop) {
@@ -72,6 +74,7 @@ import { WeatherTheme } from '../../core/models/weather.model';
           <div class="cloud cloud-2"></div>
           <div class="cloud cloud-3"></div>
         </div>
+        }
       }
     </div>
   `,
@@ -214,6 +217,7 @@ import { WeatherTheme } from '../../core/models/weather.model';
 export class WeatherEffectsComponent {
   readonly weatherTheme = input<WeatherTheme>('clear');
   readonly isNight = input(false);
+  readonly settings = inject(SettingsStore);
 
   // Generate rain drops (pre-computed for performance)
   readonly rainDrops = Array.from({ length: 40 }, (_, i) => ({

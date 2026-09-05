@@ -135,16 +135,23 @@ export class WeatherService {
     );
   }
 
-  fetchCurrentWeatherOnly(lat: number, lon: number): Observable<CurrentWeather> {
+  fetchCurrentWeatherOnly(lat: number, lon: number): Observable<CurrentWeather & { tempMax?: number, tempMin?: number }> {
     const params = new HttpParams()
       .set('latitude', lat.toString())
       .set('longitude', lon.toString())
       .set('current', CURRENT_PARAMS)
-      .set('timezone', 'auto');
+      .set('daily', 'temperature_2m_max,temperature_2m_min')
+      .set('timezone', 'auto')
+      .set('forecast_days', '1');
 
-    return this.http.get<{ current: Record<string, number | string> }>(FORECAST_API, { params }).pipe(
+    return this.http.get<{ current: Record<string, number | string>, daily?: Record<string, (number | string | null)[]> }>(FORECAST_API, { params }).pipe(
       retry({ count: 2, delay: (error, retryCount) => timer(retryCount * 1000) }),
-      map(response => this.mapCurrentWeather(response.current))
+      map(response => {
+        const current = this.mapCurrentWeather(response.current);
+        const tempMax = response.daily?.['temperature_2m_max']?.[0] as number | undefined;
+        const tempMin = response.daily?.['temperature_2m_min']?.[0] as number | undefined;
+        return { ...current, tempMax, tempMin };
+      })
     );
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
@@ -6,6 +6,7 @@ import { SettingsStore } from '../../core/state/settings.store';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
+import { Skeleton } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import {
   windDirectionLabel,
   uvIndexLabel,
@@ -17,12 +18,28 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 @Component({
   selector: 'nimbus-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, RouterLink, DatePipe],
+  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, Skeleton, RouterLink, DatePipe],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
-      <div class="loading-state" style="background: var(--bg-primary); color: var(--text-primary);">
-        <div class="loading-spinner"></div>
-        <span>Loading...</span>
+      <div class="details-page" style="background: var(--bg-primary); color: var(--text-primary);">
+        <div class="hero-theme-card">
+          <header class="top-nav">
+            <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+            <nimbus-skeleton width="80px" height="20px" radius="full" />
+            <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+          </header>
+          <div class="hero-weather">
+            <nimbus-skeleton width="72px" height="72px" radius="full" class="mb-4" />
+            <nimbus-skeleton width="180px" height="36px" class="mb-2" />
+            <nimbus-skeleton width="120px" height="20px" class="mb-4" />
+            <div class="hero-divider"></div>
+            <nimbus-skeleton width="140px" height="20px" />
+          </div>
+        </div>
+        <div class="details-bottom">
+          <nimbus-skeleton width="100%" height="150px" radius="28px" class="mb-4" />
+          <nimbus-skeleton width="100%" height="150px" radius="28px" />
+        </div>
       </div>
     } @else {
       <div [class]="'details-page bottom-theme-section bottom-theme-section--' + weather.weatherTheme()">
@@ -32,12 +49,27 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
             <button class="nav-btn" routerLink="/" aria-label="Back">
               <i class="ph ph-caret-left" style="font-size: 26px;"></i>
             </button>
-            <div class="page-header">
-              <i class="ph ph-thermometer-simple" style="font-size: 20px;"></i>
-              <span>Details</span>
+            <div class="page-header" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="ph ph-thermometer-simple" style="font-size: 20px;"></i>
+                <span>Details</span>
+              </div>
+              @if (weather.lastFetchedAt()) {
+                <div style="font-size: 10px; opacity: 0.7; font-weight: 500; display: flex; align-items: center;">
+                  <i class="ph ph-arrows-clockwise" style="margin-right: 4px;"></i>
+                  Updated {{ weather.lastFetchedAt() | date:'shortTime' }}
+                  @if (weather.isShowingCachedData()) {
+                    <span style="color: var(--warning); margin-left: 4px;">(Offline)</span>
+                  }
+                </div>
+              }
             </div>
             <button class="nav-btn" (click)="shareForecast()" aria-label="Share Forecast">
-              <i class="ph ph-share-network" style="font-size: 26px;"></i>
+              @if (copySuccess()) {
+                <i class="ph ph-check" style="font-size: 26px; color: var(--success);"></i>
+              } @else {
+                <i class="ph ph-share-network" style="font-size: 26px;"></i>
+              }
             </button>
           </header>
 
@@ -155,6 +187,15 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
                       <span class="sm-label">Sunset</span>
                       <span class="sm-value">{{ weather.todaySunset() | date:'shortTime' }}</span>
                     </div>
+                    <div class="sun-moon-item" style="grid-column: span 2; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                      <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span class="sm-label" style="display: flex; align-items: center; gap: 6px;">
+                          <i class="ph-fill ph-{{ getMoonPhase().icon }}"></i>
+                          {{ getMoonPhase().phase }}
+                        </span>
+                        <span class="sm-label">Illumination: {{ (getMoonPhase().cycle * 100).toFixed(0) }}%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               }
@@ -221,7 +262,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
     }
 
     .page-header {
-      display: none;
+      display: flex;
     }
 
     .hero-weather {
@@ -522,6 +563,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 export class DetailsComponent {
   readonly weather = inject(WeatherStore);
   readonly settings = inject(SettingsStore);
+  readonly copySuccess = signal(false);
 
   Math = Math; // Make Math available in template
 
@@ -591,7 +633,8 @@ export class DetailsComponent {
       }
     } else {
       navigator.clipboard.writeText(text);
-      alert('Forecast copied to clipboard!');
+      this.copySuccess.set(true);
+      setTimeout(() => this.copySuccess.set(false), 2000);
     }
   }
 

@@ -1,20 +1,41 @@
 import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
+import { Skeleton } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { getWeatherMeta } from '../../core/models/weather.model';
 
 @Component({
   selector: 'nimbus-forecast',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, WeatherIcon, WindSpeedPipe, TemperaturePipe],
+  imports: [RouterLink, CommonModule, WeatherIcon, WindSpeedPipe, TemperaturePipe, Skeleton, DatePipe],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
-      <div class="loading-state">Loading...</div>
+      <div class="forecast-page" style="background: var(--bg-primary); color: var(--text-primary);">
+        <div class="hero-theme-card">
+          <header class="top-nav">
+            <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+            <nimbus-skeleton width="80px" height="20px" radius="full" />
+            <div class="nav-btn"><nimbus-skeleton width="24px" height="24px" radius="full" /></div>
+          </header>
+          <div class="tomorrow-info">
+            <nimbus-skeleton width="100px" height="20px" class="mb-4" />
+            <div class="tomorrow-weather">
+              <nimbus-skeleton width="100px" height="100px" radius="full" />
+              <nimbus-skeleton width="80px" height="60px" />
+            </div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+            <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+            <div class="hero-stat"><nimbus-skeleton width="48px" height="48px" /></div>
+          </div>
+        </div>
+      </div>
     } @else {
       <div class="forecast-page">
         <!-- Top Blue Card -->
@@ -23,9 +44,20 @@ import { getWeatherMeta } from '../../core/models/weather.model';
             <button class="nav-btn" routerLink="/" aria-label="Back">
               <i class="ph ph-caret-left" style="font-size: 28px;"></i>
             </button>
-            <div class="page-header">
-              <i class="ph ph-calendar-blank" style="font-size: 20px;"></i>
-              <span>7 days</span>
+            <div class="page-header" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="ph ph-calendar-blank" style="font-size: 20px;"></i>
+                <span>7 days</span>
+              </div>
+              @if (weather.lastFetchedAt()) {
+                <div style="font-size: 10px; opacity: 0.7; font-weight: 500; display: flex; align-items: center;">
+                  <i class="ph ph-arrows-clockwise" style="margin-right: 4px;"></i>
+                  Updated {{ timeAgo(weather.lastFetchedAt()) }}
+                  @if (weather.isShowingCachedData()) {
+                    <span style="color: var(--warning); margin-left: 4px;">(Offline)</span>
+                  }
+                </div>
+              }
             </div>
             <button class="nav-btn" aria-label="Options">
               <i class="ph ph-dots-three" style="font-size: 28px;"></i>
@@ -301,6 +333,18 @@ export class ForecastComponent {
     const daily = this.weather.dailyForecast();
     return daily.length > 1 ? daily[1] : daily[0];
   });
+
+  timeAgo(date: Date | null): string {
+    if (!date) return '';
+    const diffMs = new Date().getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins === 1) return '1m ago';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs === 1) return '1h ago';
+    return `${diffHrs}h ago`;
+  }
 
   readonly sevenDays = computed(() => {
     return this.weather.dailyForecast();

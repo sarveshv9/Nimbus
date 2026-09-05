@@ -1,5 +1,6 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { getWeatherMeta } from '../../../core/models/weather.model';
+import { SettingsStore } from '../../../core/state/settings.store';
 
 /**
  * 3D Cartoonish Weather Icon Component.
@@ -19,6 +20,7 @@ import { getWeatherMeta } from '../../../core/models/weather.model';
       [attr.aria-label]="ariaLabel"
       role="img"
       class="weather-svg"
+      [class.animated]="!settings.reducedMotion()"
     >
       <defs>
         <!-- Filter for 3D Soft Shadows -->
@@ -341,12 +343,20 @@ import { getWeatherMeta } from '../../../core/models/weather.model';
       display: block;
       overflow: visible;
     }
+    .weather-svg.animated {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
   `],
 })
 export class WeatherIcon {
   readonly weatherCode = input<number>(0);
   readonly isDay = input<boolean>(true);
   readonly size = input<number>(48);
+  readonly settings = inject(SettingsStore);
 
   get iconName(): string {
     return getWeatherMeta(this.weatherCode()).icon;

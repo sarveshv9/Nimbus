@@ -1,12 +1,13 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe, LowerCasePipe } from '@angular/common';
+import { LowerCasePipe } from '@angular/common';
 import { WeatherStore } from '../../core/state/weather.store';
 import { SettingsStore } from '../../core/state/settings.store';
 import { LocationStore } from '../../core/state/location.store';
 import { formatLocationShort } from '../../core/models/location.model';
 import { convertTemperature, formatTemperature, windDirectionLabel, uvIndexLabel, uvIndexColor, visibilityLabel } from '../../core/models/settings.model';
 import { getWeatherMeta, getSwearyLabel } from '../../core/models/weather.model';
+import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 import { WeatherIcon } from '../../shared/components/weather-icon/weather-icon.component';
 import { Skeleton } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
@@ -15,7 +16,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 @Component({
   selector: 'nimbus-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, WeatherIcon, Skeleton, WindSpeedPipe, TemperaturePipe, LowerCasePipe, DatePipe],
+  imports: [RouterLink, WeatherIcon, Skeleton, WindSpeedPipe, TemperaturePipe, LowerCasePipe, GlassCard],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -29,11 +30,22 @@ export class HomeComponent {
   readonly formatTemp = formatTemperature;
   readonly getWeatherMeta = getWeatherMeta;
   readonly getSwearyLabel = getSwearyLabel;
-  readonly windDirectionLabel = windDirectionLabel;
   readonly uvIndexLabel = uvIndexLabel;
   readonly uvIndexColor = uvIndexColor;
   readonly visibilityLabel = visibilityLabel;
   readonly Math = Math;
+
+  timeAgo(date: Date | null): string {
+    if (!date) return '';
+    const diffMs = new Date().getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins === 1) return '1m ago';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs === 1) return '1h ago';
+    return `${diffHrs}h ago`;
+  }
 
   get locationName(): string {
     const loc = this.weather.selectedLocation();

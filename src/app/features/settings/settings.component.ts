@@ -11,16 +11,16 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
   template: `
     <div class="settings-page">
       <!-- Top Navigation -->
-      <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()" style="padding-top: var(--space-4); padding-bottom: var(--space-6);">
+      <div class="glass-header" style="padding-top: var(--space-4); padding-bottom: var(--space-6);">
         <nav class="top-nav">
           <a routerLink="/" class="nav-btn" aria-label="Back">
-            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            <i class="ph-bold ph-caret-left" style="font-size: 28px;"></i>
           </a>
           <div class="location-header">
             <h1 class="page-title">Settings</h1>
           </div>
           <div class="nav-btn" style="opacity: 0">
-            <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+            <i class="ph-bold ph-caret-left" style="font-size: 28px;"></i>
           </div>
         </nav>
       </div>
@@ -133,7 +133,12 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
               <div class="setting-row">
                 <div class="setting-info">
                   <span class="setting-name">Sweary Labels</span>
-                  <span class="setting-desc">Show bold weather descriptions <span class="sweary-preview" [class.active]="settings.swearyLabels()">(e.g., "It's f*cking cold")</span></span>
+                  <span class="setting-desc">Show bold weather descriptions</span>
+                  @if (settings.swearyLabels()) {
+                    <span class="setting-desc" style="color: var(--accent); font-style: italic; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                      <i class="ph-fill ph-check-circle" style="font-size: 14px;"></i> e.g., "It's f*cking cold"
+                    </span>
+                  }
                 </div>
                 <button class="switch" [class.active]="settings.swearyLabels()" (click)="toggleSweary()" role="switch" [attr.aria-checked]="settings.swearyLabels()" aria-label="Toggle sweary labels">
                   <span class="switch-thumb"></span>
@@ -224,6 +229,13 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
                 <i class="ph ph-caret-right" style="font-size: 20px; opacity: 0.5;"></i>
               </a>
 
+              <div class="setting-row clickable-row" (click)="clearWeatherCache()">
+                <div class="setting-info">
+                  <span class="setting-name">Clear Weather Cache</span>
+                  <span class="setting-desc">Remove stored weather data (frees up space)</span>
+                </div>
+              </div>
+
               <div class="setting-row clickable-row" (click)="resetApp()">
                 <div class="setting-info">
                   <span class="setting-name text-danger">Clear Cache / Reset App</span>
@@ -274,10 +286,17 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: var(--bg-surface);
+      background: transparent;
       color: var(--text-primary);
       animation: fadeIn var(--duration-normal) var(--ease-decel);
       position: relative;
+    }
+
+    .glass-header {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .top-nav {
@@ -324,8 +343,7 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
       flex-direction: column;
       gap: var(--space-8);
       position: relative;
-      background: var(--bg-surface);
-      border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
+      background: transparent;
       margin-top: -20px;
     }
 
@@ -345,8 +363,10 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
     }
 
     .settings-card {
-      background: var(--bg-card);
-      border: var(--card-border);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
       border-radius: var(--radius-2xl);
       box-shadow: var(--shadow-sm);
       overflow: hidden;
@@ -671,6 +691,20 @@ export class SettingsComponent {
     const select = event.target as HTMLSelectElement;
     this.settings.setDefaultLocationOnLaunch(select.value as DefaultLocation);
     this.triggerFeedback();
+  }
+
+  clearWeatherCache() {
+    if (confirm('Are you sure you want to clear all downloaded weather data?')) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('nimbus-weather-')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      this.triggerFeedback();
+    }
   }
 
   resetApp() {

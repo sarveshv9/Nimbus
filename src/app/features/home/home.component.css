@@ -257,10 +257,12 @@
   display: flex;
   gap: var(--space-4);
   overflow-x: auto;
-  padding: var(--space-2) 0 var(--space-4) 0;
+  padding: var(--space-2) var(--space-6) var(--space-4) var(--space-6);
   margin: 0 calc(-1 * var(--space-6));
-  padding-left: var(--space-6);
-  padding-right: var(--space-6);
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--space-6);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
 }
 
 .timeline-items::-webkit-scrollbar {
@@ -278,6 +280,7 @@
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-default);
   opacity: 0.8;
+  scroll-snap-align: start;
 }
 
 .timeline-item.active {

@@ -78,6 +78,10 @@ export class LocationStore {
     this.recentSearches.set([]);
   }
 
+  removeRecentSearch(locationId: number): void {
+    this.recentSearches.update(recent => recent.filter(l => l.id !== locationId));
+  }
+
   // === PRIVATE ===
 
   private hydrate(): void {
