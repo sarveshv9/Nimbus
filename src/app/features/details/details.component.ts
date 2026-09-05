@@ -14,11 +14,12 @@ import {
   pressureLabel,
 } from '../../core/models/settings.model';
 import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/weather.model';
+import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 
 @Component({
   selector: 'nimbus-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, Skeleton, RouterLink, DatePipe],
+  imports: [TemperaturePipe, WindSpeedPipe, WeatherIcon, Skeleton, RouterLink, DatePipe, GlassCard],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
       <div class="details-page" style="background: var(--bg-primary); color: var(--text-primary);">
@@ -41,22 +42,39 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
           <nimbus-skeleton width="100%" height="150px" radius="28px" />
         </div>
       </div>
+    } @else if (weather.error() && !weather.hasData()) {
+      <div class="details-page empty-container" style="justify-content: center; padding: var(--space-6);">
+        <nimbus-glass-card style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; border: 1px solid rgba(255, 0, 0, 0.1);">
+          <i class="ph-bold ph-warning-circle text-danger" style="font-size: 64px; opacity: 0.8; color: var(--danger);"></i>
+          <h3 style="margin: 0; font-size: 20px; font-weight: 800;">Failed to load details</h3>
+          <p class="error-message" style="opacity: 0.7; font-size: 14px; margin: 0;">{{ weather.error()?.message || 'Please check your connection and try again.' }}</p>
+          <button class="search-btn" (click)="weather.refreshCurrentLocation()">Try Again</button>
+        </nimbus-glass-card>
+      </div>
+    } @else if (!weather.currentWeather()) {
+      <div class="details-page empty-container" style="justify-content: center; padding: var(--space-6);">
+        <nimbus-glass-card style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <i class="ph-bold ph-thermometer-simple text-muted" style="font-size: 64px; opacity: 0.5;"></i>
+          <h3 style="margin: 0; font-size: 20px; font-weight: 800;">No Details Available</h3>
+          <p style="opacity: 0.7; font-size: 14px; margin: 0;">We couldn't retrieve the weather details for this location.</p>
+        </nimbus-glass-card>
+      </div>
     } @else {
       <div [class]="'details-page bottom-theme-section bottom-theme-section--' + weather.weatherTheme()">
         <!-- Top Hero Card -->
         <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()">
           <header class="top-nav">
             <button class="nav-btn" routerLink="/" aria-label="Back">
-              <i class="ph ph-caret-left" style="font-size: 26px;"></i>
+              <i class="ph-bold ph-caret-left" style="font-size: 26px;"></i>
             </button>
             <div class="page-header" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="ph ph-thermometer-simple" style="font-size: 20px;"></i>
+                <i class="ph-bold ph-thermometer-simple" style="font-size: 20px;"></i>
                 <span>Details</span>
               </div>
               @if (weather.lastFetchedAt()) {
                 <div style="font-size: 10px; opacity: 0.7; font-weight: 500; display: flex; align-items: center;">
-                  <i class="ph ph-arrows-clockwise" style="margin-right: 4px;"></i>
+                  <i class="ph-bold ph-arrows-clockwise" style="margin-right: 4px;"></i>
                   Updated {{ weather.lastFetchedAt() | date:'shortTime' }}
                   @if (weather.isShowingCachedData()) {
                     <span style="color: var(--warning); margin-left: 4px;">(Offline)</span>
@@ -66,9 +84,9 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
             </div>
             <button class="nav-btn" (click)="shareForecast()" aria-label="Share Forecast">
               @if (copySuccess()) {
-                <i class="ph ph-check" style="font-size: 26px; color: var(--success);"></i>
+                <i class="ph-bold ph-check" style="font-size: 26px; color: var(--success);"></i>
               } @else {
-                <i class="ph ph-share-network" style="font-size: 26px;"></i>
+                <i class="ph-bold ph-share-network" style="font-size: 26px;"></i>
               }
             </button>
           </header>
@@ -90,11 +108,11 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
               @if (weather.todayHighLow(); as hl) {
                 <div class="hero-bottom-bar">
                   <div class="hero-bottom-info">
-                    <i class="ph ph-arrow-up" style="font-size: 13px;"></i>
+                    <i class="ph-bold ph-arrow-up" style="font-size: 13px;"></i>
                     <span class="hero-bottom-label">{{ hl.high | temperature }}</span>
                   </div>
                   <div class="hero-bottom-info">
-                    <i class="ph ph-arrow-down" style="font-size: 13px;"></i>
+                    <i class="ph-bold ph-arrow-down" style="font-size: 13px;"></i>
                     <span class="hero-bottom-label">{{ hl.low | temperature }}</span>
                   </div>
                 </div>
@@ -111,7 +129,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
             <div class="bento-row bento-row--split">
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-thermometer" style="color: var(--accent);"></i>
+                  <i class="ph-bold ph-thermometer" style="color: var(--accent);"></i>
                   <span>Feels Like</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.feelsLike | temperature }}</div>
@@ -120,7 +138,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-sun" style="color: var(--warning);"></i>
+                  <i class="ph-bold ph-sun" style="color: var(--warning);"></i>
                   <span>UV Index</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.uvIndex }}</div>
@@ -135,7 +153,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
             <div class="bento-row bento-row--split">
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-wind" style="color: var(--info);"></i>
+                  <i class="ph-bold ph-wind" style="color: var(--info);"></i>
                   <span>Wind</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.windSpeed | windSpeed }}</div>
@@ -146,7 +164,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
 
               <div class="feature-tile">
                 <div class="feature-tile-header">
-                  <i class="ph ph-drop" style="color: var(--accent);"></i>
+                  <i class="ph-bold ph-drop" style="color: var(--accent);"></i>
                   <span>Precipitation</span>
                 </div>
                 <div class="feature-tile-value font-display">{{ current.precipitation }} <span style="font-size: 16px;">mm</span></div>
@@ -159,7 +177,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
               @if (weather.airQuality(); as aqi) {
                 <div class="wide-card">
                   <div class="feature-tile-header">
-                    <i class="ph ph-leaf" style="color: #10B981;"></i>
+                    <i class="ph-bold ph-leaf" style="color: #10B981;"></i>
                     <span>Air Quality</span>
                   </div>
                   <div class="aqi-row" style="display: flex; gap: 16px; align-items: center;">
@@ -175,7 +193,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
               @if (weather.dailyForecast()[0]; as today) {
                 <div class="wide-card">
                   <div class="feature-tile-header">
-                    <i class="ph ph-moon-stars" style="color: #6366F1;"></i>
+                    <i class="ph-bold ph-moon-stars" style="color: #6366F1;"></i>
                     <span>Sun & Moon</span>
                   </div>
                   <div class="sun-moon-grid">
@@ -204,7 +222,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
             <!-- Row 4: Remaining stats -->
             <div class="stat-list-card">
               <div class="stat-row">
-                <div class="stat-row-icon"><i class="ph ph-gauge"></i></div>
+                <div class="stat-row-icon"><i class="ph-bold ph-gauge"></i></div>
                 <div class="stat-row-body">
                   <span class="stat-row-label">Pressure</span>
                   <span class="stat-row-desc">{{ pressureLabel(current.pressure) }}</span>
@@ -213,7 +231,7 @@ import { getAqiCategory, getWeatherMeta, getMoonPhase } from '../../core/models/
               </div>
 
               <div class="stat-row">
-                <div class="stat-row-icon"><i class="ph ph-eye"></i></div>
+                <div class="stat-row-icon"><i class="ph-bold ph-eye"></i></div>
                 <div class="stat-row-body">
                   <span class="stat-row-label">Visibility</span>
                   <span class="stat-row-desc">{{ visibilityLabel(current.visibility) }}</span>

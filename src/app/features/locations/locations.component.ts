@@ -40,7 +40,7 @@ interface LocationWeatherState {
         
         @if (locationStore.hasSavedLocations()) {
           <div class="search-bar-container">
-            <i class="ph ph-magnifying-glass search-icon"></i>
+            <i class="ph-bold ph-magnifying-glass search-icon"></i>
             <input 
               type="text" 
               class="search-input" 
@@ -87,9 +87,9 @@ interface LocationWeatherState {
                        [attr.aria-label]="getAriaLabel(location)">
                     
                     <div class="drag-handle" (click)="$event.stopPropagation()">
-                      <button class="reorder-btn" (click)="moveUp(location, $index)" aria-label="Move up" [disabled]="$index === 0"><i class="ph ph-caret-up"></i></button>
-                      <i class="ph ph-dots-six-vertical" cdkDragHandle style="cursor: grab; padding: 4px;"></i>
-                      <button class="reorder-btn" (click)="moveDown(location, $index)" aria-label="Move down" [disabled]="$index === filteredLocations().length - 1"><i class="ph ph-caret-down"></i></button>
+                      <button class="reorder-btn" (click)="moveUp(location, $index)" aria-label="Move up" [disabled]="$index === 0"><i class="ph-bold ph-caret-up"></i></button>
+                      <i class="ph-bold ph-dots-six-vertical" cdkDragHandle style="cursor: grab; padding: 4px;" aria-label="Drag to reorder"></i>
+                      <button class="reorder-btn" (click)="moveDown(location, $index)" aria-label="Move down" [disabled]="$index === filteredLocations().length - 1"><i class="ph-bold ph-caret-down"></i></button>
                     </div>
 
                     <div class="card-clickable-area" (click)="selectLocation(location)">
@@ -115,7 +115,7 @@ interface LocationWeatherState {
                           <nimbus-weather-icon [weatherCode]="weather.weatherCode" [isDay]="weather.isDay" [size]="48" />
                         } @else if (locationWeather()[location.id]?.error) {
                           <div class="error-state" (click)="$event.stopPropagation(); retryLocation(location)">
-                            <i class="ph ph-warning-circle text-danger"></i>
+                            <i class="ph-bold ph-warning-circle text-danger"></i>
                             <span class="retry-text">Unavailable - Retry</span>
                           </div>
                         } @else {
@@ -127,13 +127,13 @@ interface LocationWeatherState {
 
                   <div class="swipe-actions">
                     <button class="action-btn set-home-btn" (click)="$event.stopPropagation(); setHome(location.id)" aria-label="Set as home">
-                      <i class="ph ph-house"></i>
+                      <i class="ph-bold ph-house"></i>
                     </button>
                     <button class="action-btn delete-btn" (click)="$event.stopPropagation(); confirmRemove(location)" [attr.aria-label]="pendingDeleteId() === location.id ? 'Confirm delete' : 'Delete location'">
                       @if (pendingDeleteId() === location.id) {
                         <span style="font-size: 14px; font-weight: bold; padding: 0 4px;">Confirm?</span>
                       } @else {
-                        <i class="ph ph-trash"></i>
+                        <i class="ph-bold ph-trash"></i>
                       }
                     </button>
                   </div>

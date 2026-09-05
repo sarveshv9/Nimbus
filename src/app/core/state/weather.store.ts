@@ -233,6 +233,11 @@ export class WeatherStore {
     return this.storage.get<GeoLocation>(STORAGE_KEY_LOCATION);
   }
 
+  setGeolocationError(message: string): void {
+    this.isLoading.set(false);
+    this.error.set({ type: 'geolocation-denied', message });
+  }
+
   clearError(): void {
     this.error.set(null);
   }

@@ -257,23 +257,23 @@ import { WindSpeedUnit, PressureUnit, DistanceUnit, TimeFormat, DefaultLocation,
                   <span class="setting-desc">Nimbus v1.1.0</span>
                 </div>
               </div>
-              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
-                <div class="setting-info">
-                  <span class="setting-name">Privacy Policy</span>
+              <a href="https://openweathermap.org" target="_blank" class="setting-row" style="text-decoration: none" aria-label="Open Weather Map website">
+                <div class="setting-label">
+                  <div class="setting-name">Weather Data</div>
                 </div>
-                <i class="ph ph-arrow-up-right" style="font-size: 16px; opacity: 0.5;"></i>
+                <i class="ph-bold ph-arrow-up-right" style="font-size: 16px; opacity: 0.5;"></i>
               </a>
-              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
-                <div class="setting-info">
-                  <span class="setting-name">Terms of Service</span>
+              <div class="setting-row" (click)="clearWeatherCache()" tabindex="0" role="button" aria-label="Clear cached weather data">
+                <div class="setting-label">
+                  <div class="setting-name" style="color: var(--danger)">Clear Cached Data</div>
                 </div>
-                <i class="ph ph-arrow-up-right" style="font-size: 16px; opacity: 0.5;"></i>
-              </a>
-              <a href="#" class="setting-row clickable-row" (click)="\$event.preventDefault()">
-                <div class="setting-info">
-                  <span class="setting-name">Send Feedback</span>
+                <i class="ph-bold ph-caret-right" style="font-size: 20px; opacity: 0.5;"></i>
+              </div>
+              <a href="mailto:support@nimbus.app" class="setting-row" style="text-decoration: none" aria-label="Send Feedback via Email">
+                <div class="setting-label">
+                  <div class="setting-name">Send Feedback</div>
                 </div>
-                <i class="ph ph-envelope-simple" style="font-size: 20px; opacity: 0.5;"></i>
+                <i class="ph-bold ph-envelope-simple" style="font-size: 20px; opacity: 0.5;"></i>
               </a>
             </div>
           </div>

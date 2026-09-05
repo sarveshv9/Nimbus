@@ -8,11 +8,12 @@ import { WindSpeedPipe } from '../../shared/pipes/wind-speed.pipe';
 import { Skeleton } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { getWeatherMeta } from '../../core/models/weather.model';
+import { GlassCard } from '../../shared/components/glass-card/glass-card.component';
 
 @Component({
   selector: 'nimbus-forecast',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CommonModule, WeatherIcon, WindSpeedPipe, TemperaturePipe, Skeleton, DatePipe],
+  imports: [RouterLink, CommonModule, WeatherIcon, WindSpeedPipe, TemperaturePipe, Skeleton, DatePipe, GlassCard],
   template: `
     @if (weather.isLoading() && !weather.hasData()) {
       <div class="forecast-page" style="background: var(--bg-primary); color: var(--text-primary);">
@@ -36,22 +37,39 @@ import { getWeatherMeta } from '../../core/models/weather.model';
           </div>
         </div>
       </div>
+    } @else if (weather.error() && !weather.hasData()) {
+      <div class="forecast-page empty-container" style="justify-content: center; padding: var(--space-6);">
+        <nimbus-glass-card style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; border: 1px solid rgba(255, 0, 0, 0.1);">
+          <i class="ph-bold ph-warning-circle text-danger" style="font-size: 64px; opacity: 0.8; color: var(--danger);"></i>
+          <h3 style="margin: 0; font-size: 20px; font-weight: 800;">Failed to load forecast</h3>
+          <p class="error-message" style="opacity: 0.7; font-size: 14px; margin: 0;">{{ weather.error()?.message || 'Please check your connection and try again.' }}</p>
+          <button class="search-btn" (click)="weather.refreshCurrentLocation()">Try Again</button>
+        </nimbus-glass-card>
+      </div>
+    } @else if (sevenDays().length === 0) {
+      <div class="forecast-page empty-container" style="justify-content: center; padding: var(--space-6);">
+        <nimbus-glass-card style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <i class="ph-bold ph-calendar-blank text-muted" style="font-size: 64px; opacity: 0.5;"></i>
+          <h3 style="margin: 0; font-size: 20px; font-weight: 800;">No Forecast Available</h3>
+          <p style="opacity: 0.7; font-size: 14px; margin: 0;">We couldn't retrieve the 7-day forecast for this location.</p>
+        </nimbus-glass-card>
+      </div>
     } @else {
       <div class="forecast-page">
         <!-- Top Blue Card -->
         <div [class]="'hero-theme-card hero-theme-card--' + weather.weatherTheme()">
           <header class="top-nav">
             <button class="nav-btn" routerLink="/" aria-label="Back">
-              <i class="ph ph-caret-left" style="font-size: 28px;"></i>
+              <i class="ph-bold ph-caret-left" style="font-size: 28px;"></i>
             </button>
             <div class="page-header" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="ph ph-calendar-blank" style="font-size: 20px;"></i>
+                <i class="ph-bold ph-calendar-blank" style="font-size: 20px;"></i>
                 <span>7 days</span>
               </div>
               @if (weather.lastFetchedAt()) {
                 <div style="font-size: 10px; opacity: 0.7; font-weight: 500; display: flex; align-items: center;">
-                  <i class="ph ph-arrows-clockwise" style="margin-right: 4px;"></i>
+                  <i class="ph-bold ph-arrows-clockwise" style="margin-right: 4px;"></i>
                   Updated {{ timeAgo(weather.lastFetchedAt()) }}
                   @if (weather.isShowingCachedData()) {
                     <span style="color: var(--warning); margin-left: 4px;">(Offline)</span>
@@ -60,7 +78,7 @@ import { getWeatherMeta } from '../../core/models/weather.model';
               }
             </div>
             <button class="nav-btn" aria-label="Options">
-              <i class="ph ph-dots-three" style="font-size: 28px;"></i>
+              <i class="ph-bold ph-dots-three" style="font-size: 28px;"></i>
             </button>
           </header>
 
@@ -78,17 +96,17 @@ import { getWeatherMeta } from '../../core/models/weather.model';
 
           <div class="hero-stats">
             <div class="hero-stat">
-              <i class="ph ph-wind stat-icon" style="font-size: 24px;"></i>
+              <i class="ph-bold ph-wind stat-icon" style="font-size: 24px;"></i>
               <span class="stat-val">{{ tomorrow()?.windSpeedMax | windSpeed }}</span>
               <span class="stat-lbl">Wind</span>
             </div>
             <div class="hero-stat">
-              <i class="ph ph-sun stat-icon" style="font-size: 24px;"></i>
+              <i class="ph-bold ph-sun stat-icon" style="font-size: 24px;"></i>
               <span class="stat-val">{{ tomorrow()?.uvIndexMax }}</span>
               <span class="stat-lbl">Max UV</span>
             </div>
             <div class="hero-stat">
-              <i class="ph ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
+              <i class="ph-bold ph-cloud-rain stat-icon" style="font-size: 24px;"></i>
               <span class="stat-val">{{ tomorrow()?.precipitationProbabilityMax ?? 0 }}%</span>
               <span class="stat-lbl">Chance of rain</span>
             </div>

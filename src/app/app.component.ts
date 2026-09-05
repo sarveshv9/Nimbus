@@ -56,8 +56,7 @@ export class App implements OnInit {
         this.weatherStore.loadWeatherByCoords(pos.latitude, pos.longitude);
       },
       error: () => {
-        // Default to Mumbai, India
-        this.weatherStore.loadWeatherByCoords(19.0760, 72.8777);
+        this.weatherStore.setGeolocationError('Location access denied');
       },
     });
   }

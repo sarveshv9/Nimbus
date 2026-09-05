@@ -20,5 +20,23 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "description": "A premium, beautifully designed weather visualization app.",
+  "categories": ["weather", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Search City",
+      "short_name": "Search",
+      "description": "Search for a new city's weather",
+      "url": "/explore",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Saved Locations",
+      "short_name": "Locations",
+      "description": "View your saved locations",
+      "url": "/locations",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    }
   ]
 }
