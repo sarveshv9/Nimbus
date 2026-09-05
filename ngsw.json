@@ -1,0 +1,87 @@
+{
+  "configVersion": 1,
+  "timestamp": 1788631233026,
+  "index": "/Nimbus/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/Nimbus/chunk-BEkUBdmP.js",
+        "/Nimbus/chunk-Bg4KjD_0.js",
+        "/Nimbus/chunk-C8gM0OY-.js",
+        "/Nimbus/chunk-CJclUxK5.js",
+        "/Nimbus/chunk-CzKS6cIt.js",
+        "/Nimbus/chunk-DSSpqCor.js",
+        "/Nimbus/chunk-DjHhZr1f.js",
+        "/Nimbus/chunk-DtbVcfSk.js",
+        "/Nimbus/chunk-IRU1HnFT.js",
+        "/Nimbus/chunk-UMNtD-YE.js",
+        "/Nimbus/chunk-iUddic0C.js",
+        "/Nimbus/favicon.ico",
+        "/Nimbus/index.html",
+        "/Nimbus/main-EXP6B3RP.js",
+        "/Nimbus/manifest.webmanifest",
+        "/Nimbus/styles-TESKF5ER.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/Nimbus/icons/icon-192x192.png",
+        "/Nimbus/icons/icon-512x512.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/Nimbus/chunk-BEkUBdmP.js": "c240aa9146df6c1f6b7b0122d53ac5b08ea21413",
+    "/Nimbus/chunk-Bg4KjD_0.js": "ecc7d446f9e05763437ff596f6247c6e44eef53b",
+    "/Nimbus/chunk-C8gM0OY-.js": "7c9c884b939c8f859fb48b2cf18e7da0ca55ef85",
+    "/Nimbus/chunk-CJclUxK5.js": "8f96773c6d10e6bdb54a384f2e4acf3f2c6b1672",
+    "/Nimbus/chunk-CzKS6cIt.js": "9cfd61090084129d9404c06bac6dee8b02b852e2",
+    "/Nimbus/chunk-DSSpqCor.js": "fbe2dc3294a9a3982215a8ef5b8ead2c3195e857",
+    "/Nimbus/chunk-DjHhZr1f.js": "ce33bd8cd89ca523638d4f19ad9ce0d3b4971c44",
+    "/Nimbus/chunk-DtbVcfSk.js": "28ca63ea200b40fc60e0c962a9ecc1cfd96e2dd5",
+    "/Nimbus/chunk-IRU1HnFT.js": "d7c3490b18e5ea65a1de3e5b21b682f4ce020813",
+    "/Nimbus/chunk-UMNtD-YE.js": "f3c45f92258dc043451db3fe68b558f84b4ecefb",
+    "/Nimbus/chunk-iUddic0C.js": "f9144d00aa8052e1996066371b3c7549d95420aa",
+    "/Nimbus/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "/Nimbus/icons/icon-192x192.png": "43984bddd27be815d1180d54d19683cf8de51222",
+    "/Nimbus/icons/icon-512x512.png": "7333f9d2710879bbb228458252197f7856e01282",
+    "/Nimbus/index.html": "bf5e58f818021ecdde7750b8986b5b00a18dec9b",
+    "/Nimbus/main-EXP6B3RP.js": "4a3ad7a08083a678a83a0392b4930703f15f86a0",
+    "/Nimbus/manifest.webmanifest": "fa648f65793877e1a72fb217335acb06bf10a1c9",
+    "/Nimbus/styles-TESKF5ER.css": "e046bcf4cadf036a4055c1f71ac9f4d5f2b2f0e5"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}

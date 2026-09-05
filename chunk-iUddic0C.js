@@ -1,0 +1,1 @@
+import{Rt as g,a as g$1,m as Aa,o as h}from"./main-EXP6B3RP.js";var o=class t{settings=g(h);transform(e){return e==null?`--`:g$1(e,this.settings.windSpeedUnit())}static ɵfac=function(s){return new(s||t)};static ɵpipe=Aa({name:`windSpeed`,type:t,pure:!1})};export{o as t};

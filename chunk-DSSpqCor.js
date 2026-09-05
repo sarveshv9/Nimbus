@@ -1,0 +1,1 @@
+function r(e){let n=[e.name];return e.admin1&&e.admin1!==e.name&&n.push(e.admin1),n.push(e.country),n.join(`, `)}function o(e){return e.admin1?`${e.name}, ${e.admin1}`:`${e.name}, ${e.country}`}export{r as n,o as t};
